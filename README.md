@@ -1,4 +1,12 @@
+Script to monitor Target, Best Buy, and Walmart URLs.
+
+Receive a WebHook upon product coming in stock!
+
+
+
 Starting with the webhooks:
+
+Default is:
 
 ```
 webhook_dict = {
@@ -9,6 +17,7 @@ webhook_dict = {
 
 }
 ```
+If you want this to work for you:
 
 Insert a webhook URL per product type if you wish, otherwise put the same webhook URL for all
 
@@ -24,9 +33,11 @@ webhook_dict = {
 }
 ```
 
+You need to add URLs or define the webhook for the default URLs to send to.
 
 URLs are tracked in a separate dictionary:
 
+While the URL is important, the name of the webhook is equally important:
 ```
 urldict = {
 "https://www.bestbuy.com/site/nintendo-switch-32gb-console-neon-red-neon-blue-joy-con/6364255.p?skuId=6364255": "bb_switch",
