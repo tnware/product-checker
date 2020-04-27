@@ -14,15 +14,16 @@ bbdict = {}
 
 
 webhook_dict = {
+#"name_your_webhook": "http://your.webhook.url/123"
 "bb_switch": "",
 "target_switch": "",
 "target_switchlite": "",
-"walmart_switch": ""
-
+"walmart_switch": ""   
 }
 
 
 urldict = {
+#"http://product.url/123": "name_your_webhook",
 "https://www.bestbuy.com/site/nintendo-switch-32gb-console-neon-red-neon-blue-joy-con/6364255.p?skuId=6364255": "bb_switch",
 "https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con/-/A-77464001": "target_switch",
 "https://www.target.com/p/nintendo-switch-with-gray-joy-con/-/A-77464002": "target_switch",
