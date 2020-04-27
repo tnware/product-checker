@@ -36,7 +36,7 @@ urldict = {
 
 Add new URLs and classify them with a webhook type specified in the webhook dictionary
 
-`"http://product.url "webhook_name"`
+`"http://product.url": "webhook_name"`
 
 Insert comma after entries up until the last entry. Default vaules are as follows:
 
