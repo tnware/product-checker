@@ -10,35 +10,20 @@ sku_dict = {}
 bestbuylist = []
 targetlist = []
 walmartlist = []
+bhlist = []
 bbdict = {}
 
-
 webhook_dict = {
-"bb_switch": "",
-"target_switch": "",
-"target_switchlite": "",
-"walmart_switch": ""
+"webhook_1": "https://discordapp.com/api/webhooks/.../.../webhook1",
+"webhook_2": "https://discordapp.com/api/webhooks/.../.../webhook2",
+"webhook_3": "https://discordapp.com/api/webhooks/.../.../webhook3"
 
 }
 
-
 urldict = {
-"https://www.bestbuy.com/site/nintendo-switch-32gb-console-neon-red-neon-blue-joy-con/6364255.p?skuId=6364255": "bb_switch",
-"https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con/-/A-77464001": "target_switch",
-"https://www.target.com/p/nintendo-switch-with-gray-joy-con/-/A-77464002": "target_switch",
-"https://www.bestbuy.com/site/nintendo-switch-32gb-console-gray-joy-con/6364253.p?skuId=6364253": "bb_switch",
-"https://www.bestbuy.com/site/nintendo-switch-animal-crossing-new-horizons-edition-32gb-console-multi/6401728.p?skuId=6401728": "bb_switch",
-"https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con-discontinued-by-manufacturer/-/A-52189185": "target_switch",
-"https://www.target.com/p/nintendo-switch-lite-coral/-/A-79574296": "target_switchlite",
-"https://www.target.com/p/nintendo-switch-lite-yellow/-/A-77419249": "target_switchlite",
-"https://www.target.com/p/nintendo-switch-lite-gray/-/A-77419246": "target_switchlite",
-"https://www.bestbuy.com/site/nintendo-geek-squad-certified-refurbished-switch-gray-joy-con/6376684.p?skuId=6376684": "bb_switch",
-"https://www.target.com/p/nintendo-switch-lite-turquoise/-/A-77419248": "target_switchlite",
-"https://www.bestbuy.com/site/nintendo-geek-squad-certified-refurbished-switch-neon-red-neon-blue-joy-con/6377113.p?skuId=6377113": "bb_switch",
-"https://www.walmart.com/ip/Nintendo-Switch-Console-with-Neon-Blue-Red-Joy-Con/709776123": "walmart_switch",
-"https://www.walmart.com/ip/Nintendo-Switch-Bundle-with-Mario-Red-Joy-Con-20-Nintendo-eShop-Credit-Carrying-Case/542896404": "walmart_switch",
-"https://www.walmart.com/ip/Nintendo-Switch-Console-with-Gray-Joy-Con/994790027": "walmart_switch"
-
+"https://www.bhphotovideo.com/c/product/1496116-REG/nintendo_hadskabaa_switch_with_neon_blue.html": "webhook_1",
+"https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con/-/A-77464001": "webhook_2",
+"https://www.walmart.com/ip/Nintendo-Switch-Console-with-Gray-Joy-Con/994790027": "webhook_3"
 
 }
 
@@ -129,6 +114,28 @@ class Walmart:
                 print("[" + current_time + "] " + "Sold Out: (Walmart.com) " + url)
                 stockdict.update({url: 'False'})
 
+class BH:
+
+    def __init__(self, url, hook):
+        self.url = url
+        self.hook = hook
+        webhook_url = webhook_dict[hook]
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        page = requests.get(url)
+        if page.status_code == 200:
+            if "Add to Cart" in page.text:
+                print("[" + current_time + "] " + "In Stock: (bhphotovideo.com) " + url)
+                slack_data = {'content': current_time + " " + url + " in stock at B&H"}
+                if stockdict.get(url) == 'False':
+                    response = requests.post(
+                                             webhook_url, data=json.dumps(slack_data),
+                                             headers={'Content-Type': 'application/json'})
+                stockdict.update({url: 'True'})
+            else:
+                print("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url)
+                stockdict.update({url: 'False'})
+
 for url in urldict:
     hook = urldict[url]
     if "bestbuy.com" in url:
@@ -157,6 +164,10 @@ for url in urldict:
     elif "walmart.com" in url:
         walmartlist.append(url)
         print("Walmart URL detected " + hook)
+    elif "bhphotovideo.com" in url:
+        bhlist.append(url)
+        print("B&H URL detected " + hook)
+
 for url in urldict:
     stockdict.update({url: 'False'}) #set all URLs to be "out of stock" to begin
 for sku in sku_dict:
@@ -179,6 +190,11 @@ while True:
         except:
             print("Some problem occurred. Skipping instance...")
 
+# BH
+    for url in bhlist:
+        hook = urldict[url]
+        BH(url, hook)
+
 # Walmart            
     for url in walmartlist:
         try:
@@ -190,4 +206,3 @@ while True:
             time.sleep(2)
 
     time.sleep(1)
-    
