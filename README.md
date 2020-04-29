@@ -1,6 +1,6 @@
-#Get webhook notifications when products come in stock. 
+# Get webhook notifications when products come in stock. 
 
-###Supports
+### Supports
 
 - Target
 - BestBuy (having issues as of 4/29)
@@ -8,10 +8,10 @@
 - Walmart (requires a waiting period between page loads or a rotating proxy (not supported within the script) to get accurate stock results)
 
 
-##How To Use
+## How To Use
 
 
-###Webhooks:
+### Webhooks:
 CURRENTLY ONLY SUPPORTS DISCORD CHANNELS.
 
 To add a different webhook provider, you must update the JSON payload that's being sent from each class: `slack_data = {'content': current_time + " " + title + " in stock at Target - " + url}` usually "content" will need to be changed, check the documentation for your webhook provider.
@@ -28,7 +28,7 @@ webhook_dict = {
 You don't need more than one webhook URL, but this is useful if you are tracking multiple products, you can streamline your notifications so you can mute certain channels when you don't want to get notifications about their stock but still want the script to run it.
 
 
-###Adding URLs:
+### Adding URLs:
 
 URLs are tracked in a separate dictionary:
 
@@ -49,7 +49,7 @@ Add new URLs and classify them with a webhook type specified in the webhook dict
 You can assign more than one url to a webhook, so for example send all nintendo switch links to webhook_1, and then send an oculus rift link to webhook_2. You could split it up by product or by site, or just have them all go to the same webhook.
 
 
-Finally:
+### Finally:
 
 Run the script and watch the console/watch for discord notifications
 
@@ -59,7 +59,7 @@ I have had a few issues receiving consistent in-stock status for normal products
 I can't guarantee the accuracy of this script as it's concstantly evolving and things break when new features are added. This certainly checks best buy stock, and i get tons of notifications about switch lites at target, but that's all i can vouch for.
 
 
-#Notes:
+# Notes:
 
 There will always be a delay after each walmart link. If you have lots of walmart links and want to adjust that delay, search for `time.sleep(5)` in the walmart section of the end of the file and change the 5 to a different number. Remember if you load pages too quickly the stock is automatically considered out of stock and you will not receive a notification even if it comes in stock. 
 
