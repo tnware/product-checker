@@ -32,6 +32,7 @@ You don't need more than one webhook URL, but this is useful if you are tracking
 
 URLs are tracked in a separate dictionary:
 
+While the URL is important, the name of the webhook is equally important:
 ```
 urldict = {
 "https://www.bhphotovideo.com/c/product/1496116-REG/nintendo_hadskabaa_switch_with_neon_blue.html": "webhook_1",
@@ -43,7 +44,7 @@ urldict = {
 
 Add new URLs and classify them with a webhook type specified in the webhook dictionary
 
-`"http://product.url "webhook_name"`
+`"http://product.url": "webhook_name"`
 
 You can assign more than one url to a webhook, so for example send all nintendo switch links to webhook_1, and then send an oculus rift link to webhook_2. You could split it up by product or by site, or just have them all go to the same webhook.
 

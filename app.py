@@ -1,3 +1,7 @@
+# https://github.com/tnware/product-checker
+# by Tyler Woods
+# coded for Bird Bot and friends
+# https://tylermade.net
 import requests
 import time
 import json
