@@ -9,10 +9,10 @@
 
 ### Requirements:
 
+- Webhook URLs (Currently supports discord out of the box. [Get a discord webhook URL](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks))
 - Python 3
 - `pip install requests` (should already be installed if you used Bird Bot)
 - `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
-
 
 # How To Use
 
@@ -69,6 +69,8 @@ Run the script with option 3 and watch the console/watch for discord notificatio
 Sample discord output:
 
 ![Discord](./img/discord.png "Discord")
+
+![Discord 2](./img/discord2.png "Discord 2")
 
 # Notes:
 
