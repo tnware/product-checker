@@ -77,3 +77,7 @@ Remember: This code is not perfect, there will be bugs, glitches, and unhandled 
 There will always be a delay after each walmart link but I am not perfect and may not have chosen an approriate delay. Remember, at Walmart, if you load pages too quickly the stock is automatically considered out of stock and you will not receive a notification even if it comes in stock. The other solution is a rotating proxy which I have not implemented yet.
 
 The script now uses multi-threading, so each URL has its own task and runs in its own thread with its own timer. This means slow/stuck URLs will not impede other URLs ability to load, and additionally you can define different timers for each URL type (if you want to refresh target every 15 seconds but best buy every 20 seconds, for example.)
+
+## False Notifications?
+
+These will usually be regional-based store pickups or actual checkout bots buying everything before you're able to. IF you don't see it in stock but are constantly getting notifications (every minute or two) then it's likely being stocked for store pickup somewhere and you should check if there is anywhere around you that has it available.
