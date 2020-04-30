@@ -87,7 +87,7 @@ class BestBuy:
             stockdict.update({sku: 'False'})
         else: 
             if stock_status == "ADD_TO_CART":
-                print("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + url)
+                print("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link)
                 slack_data = {'content': current_time + " " + product_name + " In Stock @ BestBuy " + link}
                 if stockdict.get(sku) == 'False':
                     response = requests.post(
@@ -148,18 +148,7 @@ for url in urldict:
         sku = parse_qs(parsed.query)['skuId']
         sku = sku[0]
         bestbuylist.append(sku)
-        headers = {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-        "cache-control": "max-age=0",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
-        }
-        page = requests.get(url, headers=headers)
-        al = page.text
-        title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
-        sku_dict.update({sku: title})
+        sku_dict.update({sku: url})
         bbdict.update({sku: hook})
 
     elif "target.com" in url:
@@ -190,7 +179,7 @@ while True:
     for sku in bestbuylist:
         try:
             hook = bbdict[sku]
-            BestBuy(sku, hook)
+            print("BROKEN: BestBuy servers are rejecting the current method used to check stock.")
         except:
             print("Some problem occurred. Skipping instance...")
 
