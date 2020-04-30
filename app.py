@@ -8,7 +8,9 @@ import json
 from datetime import datetime
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
-import csv
+import webhook_settings
+import product_settings
+from threading import Thread
 stockdict = {}
 sku_dict = {}
 bestbuylist = []
@@ -17,19 +19,38 @@ walmartlist = []
 bhlist = []
 bbdict = {}
 
-webhook_dict = {
-"webhook_1": "https://discordapp.com/api/webhooks/.../.../webhook1",
-"webhook_2": "https://discordapp.com/api/webhooks/.../.../webhook2",
-"webhook_3": "https://discordapp.com/api/webhooks/.../.../webhook3"
+#Function for start-up menu
 
-}
+def menu():
+    webhook_dict = return_data("./data/webhooks.json")
+    urldict = return_data("./data/products.json")
+    print("Select an Option: \n 1: Edit Webhooks \n 2: Edit Product URLs \n 3: Run the product tracker \n")
+    val = input("Enter # (1-3)")
+    if val == "1":
+        webhook_settings.main()
+        menu()
+    elif val == "2":
+        product_settings.main()
+        menu()
+    elif val == "3":
+        print("\n \n Starting Product Tracker! \n \n")
+    else:
+        menu()
 
-urldict = {
-"https://www.bhphotovideo.com/c/product/1496116-REG/nintendo_hadskabaa_switch_with_neon_blue.html": "webhook_1",
-"https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con/-/A-77464001": "webhook_2",
-"https://www.walmart.com/ip/Nintendo-Switch-Console-with-Gray-Joy-Con/994790027": "webhook_3"
+def return_data(path):
+    with open(path,"r") as file:
+        data = json.load(file)
+    file.close()
+    return data
 
-}
+#Prompt the user at startup
+menu()
+
+#Only declare the webhook and product lists after the menu has been passed so that changes made from menu selections are up to date
+webhook_dict = return_data("./data/webhooks.json")
+urldict = return_data("./data/products.json")
+
+#Declare classes for the webpage scraping functionality
 
 class Target:
 
@@ -110,9 +131,12 @@ class Walmart:
                 print("[" + current_time + "] " + "In Stock: (Walmart.com) " + url)
                 slack_data = {'content': current_time + " " + url + " in stock at Walmart"}
                 if stockdict.get(url) == 'False':
-                    response = requests.post(
-                    webhook_url, data=json.dumps(slack_data),
-                    headers={'Content-Type': 'application/json'})
+                    try:
+                        response = requests.post(
+                        webhook_url, data=json.dumps(slack_data),
+                        headers={'Content-Type': 'application/json'})
+                    except:
+                        print("Webhook sending failed. Invalid URL configured.")
                 stockdict.update({url: 'True'})
             else: 
                 print("[" + current_time + "] " + "Sold Out: (Walmart.com) " + url)
@@ -140,62 +164,100 @@ class BH:
                 print("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url)
                 stockdict.update({url: 'False'})
 
+#Classify all the URLs by site
+
 for url in urldict:
-    hook = urldict[url]
+    hook = urldict[url] #get the hook for the url so it can be passed in to the per-site lists being generated below
+
+    #BestBuy URL Detection
     if "bestbuy.com" in url:
-        print("BestBuy URL detected " + hook)
+        print("BestBuy URL dected using Webhook destination " + hook)
         parsed = urlparse.urlparse(url)
         sku = parse_qs(parsed.query)['skuId']
         sku = sku[0]
         bestbuylist.append(sku)
-        sku_dict.update({sku: url})
+        headers = {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+        "cache-control": "max-age=0",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
+        }
+        page = requests.get(url, headers=headers)
+        al = page.text
+        title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
+        sku_dict.update({sku: title})
         bbdict.update({sku: hook})
 
+    #Target URL Detection
     elif "target.com" in url:
         targetlist.append(url)
-        print("Target URL detected " + hook)
+        print("Target URL dected using Webhook destination " + hook)
+
+    #Walmart URL Detection
     elif "walmart.com" in url:
         walmartlist.append(url)
-        print("Walmart URL detected " + hook)
+        print("Walmart URL dected using Webhook destination " + hook)
+
+    #B&H Photo URL Detection
     elif "bhphotovideo.com" in url:
         bhlist.append(url)
-        print("B&H URL detected " + hook)
+        print("B&H URL dected using Webhook destination " + hook)
 
+#set all URLs to be "out of stock" to begin
 for url in urldict:
-    stockdict.update({url: 'False'}) #set all URLs to be "out of stock" to begin
+    stockdict.update({url: 'False'}) 
+#set all SKUs to be "out of stock" to begin
 for sku in sku_dict:
-    stockdict.update({sku: 'False'}) #set all SKUs to be "out of stock" to begin
-while True:
+    stockdict.update({sku: 'False'})
+    
+#DECLARE SITE FUNCTIONS
 
-# Target
-    for url in targetlist:
-        try:
-            hook = urldict[url]
-            Target(url, hook)
-        except:
-            print("Some problem occurred. Skipping instance...")
+def targetfunc(url):
+    while True:
+        hook = urldict[url]
+        Target(url, hook)
+        time.sleep(10)
 
-# Best Buy
-    for sku in bestbuylist:
-        try:
-            hook = bbdict[sku]
-            print("BROKEN: BestBuy servers are rejecting the current method used to check stock.")
-        except:
-            print("Some problem occurred. Skipping instance...")
-
-# BH
-    for url in bhlist:
+def bhfunc(url):
+    while True:
         hook = urldict[url]
         BH(url, hook)
+        time.sleep(10)
 
-# Walmart            
-    for url in walmartlist:
-        try:
-            hook = urldict[url]
-            Walmart(url, hook)
-            time.sleep(5)
-        except:
-            print("Some problem occurred. Skipping instance...")
-            time.sleep(2)
+def bestbuyfunc(sku):
+    while True:
+        hook = bbdict[sku]
+        BestBuy(sku, hook)
+        time.sleep(10)
 
-    time.sleep(1)
+def walmartfunc(url):
+    while True:
+        hook = urldict[url]
+        Walmart(url, hook)
+        time.sleep(20)
+
+
+# MAIN EXECUTION
+
+for url in targetlist:
+    t = Thread(target=targetfunc, args=(url,))
+    t.start()
+    time.sleep(0.5)
+
+for url in bhlist:
+    t = Thread(target=bhfunc, args=(url,))
+    t.start()
+    time.sleep(0.5)
+
+for sku in bestbuylist:
+    t = Thread(target=bestbuyfunc, args=(sku,))
+    t.start()
+    time.sleep(0.5)
+
+for url in walmartlist:
+    t = Thread(target=walmartfunc, args=(url,))
+    t.start()
+    time.sleep(0.5)
+    time.sleep(12)

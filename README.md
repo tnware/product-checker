@@ -3,65 +3,72 @@
 ### Supports
 
 - Target
-- BestBuy (having issues as of 4/29)
+- BestBuy
 - B&H Photo/Video
 - Walmart (requires a waiting period between page loads or a rotating proxy (not supported within the script) to get accurate stock results)
 
+### Requirements:
 
-## How To Use
+- `pip install requests` (should already be installed if you used Bird Bot)
+- `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
 
 
-### Webhooks:
-CURRENTLY ONLY SUPPORTS DISCORD CHANNELS.
+# How To Use
 
-To add a different webhook provider, you must update the JSON payload that's being sent from each class: `slack_data = {'content': current_time + " " + title + " in stock at Target - " + url}` usually "content" will need to be changed, check the documentation for your webhook provider.
+When you launch the script you will be given a menu:
 
-Add your webhook URL(s) to the script in the following format:
 ```
-webhook_dict = {
-"webhook_1": "https://discordapp.com/api/webhooks/.../.../webhook1",
-"webhook_2": "https://discordapp.com/api/webhooks/.../.../webhook2",
-"webhook_3": "https://discordapp.com/api/webhooks/.../.../webhook3"
+Select an Option: 
+ 1: Edit Webhooks
+ 2: Edit Product URLs
+ 3: Run the product tracker
 
-}
+Enter # (1-3)
 ```
+
+There are now GUI wrappers for managing Webhook URLs and Product URLs. Hit either 1 or 2 to manage those.
+
+- First, you need to edit webhooks to add your Webhook URLs and give them friendly names.
+- Then, you need to edit product URLs to add products to track and assign them a webhook destination via friendly name.
+
 You don't need more than one webhook URL, but this is useful if you are tracking multiple products, you can streamline your notifications so you can mute certain channels when you don't want to get notifications about their stock but still want the script to run it.
 
+## Adding Webhooks:
 
-### Adding URLs:
+Use option 1 to open the webhook editor. Webhooks are actually stored in `/data/webhooks.json`
 
-URLs are tracked in a separate dictionary:
+![Webhook Manager](./img/webhooks.png "Webhook Manager")
 
-While the URL is important, the name of the webhook is equally important:
-```
-urldict = {
-"https://www.bhphotovideo.com/c/product/1496116-REG/nintendo_hadskabaa_switch_with_neon_blue.html": "webhook_1",
-"https://www.target.com/p/nintendo-switch-with-neon-blue-and-neon-red-joy-con/-/A-77464001": "webhook_2",
-"https://www.walmart.com/ip/Nintendo-Switch-Console-with-Gray-Joy-Con/994790027": "webhook_3"
+Assign a friendly name to the webhook like "webhook_1" or "switch_webhook" that you will be able to recognize in the next step.
 
-}
-```
+## Adding URLs:
 
-Add new URLs and classify them with a webhook type specified in the webhook dictionary
+Use option 2 to open the URL editor. URLs are actually stored in `/data/products.json`
 
-`"http://product.url": "webhook_name"`
+![URL Manager](./img/urls.png "URL Manager")
+
+![URL Manager 2](./img/urls2.png "URL Manager 2")
+
+Make sure to select your newly-added URL and choose "configure" to assign a webhook destination, otherwise you will not receive any notifications.
 
 You can assign more than one url to a webhook, so for example send all nintendo switch links to webhook_1, and then send an oculus rift link to webhook_2. You could split it up by product or by site, or just have them all go to the same webhook.
 
 
-### Finally:
+## Finally:
 
-Run the script and watch the console/watch for discord notifications
+Run the script with option 3 and watch the console/watch for discord notifications
+
+![Console](./img/console.png "Console")
 
 
-I have had a few issues receiving consistent in-stock status for normal products so I added a 5sec delay to each walmart link. Not positive if it even helps, but if you bash walmart too quickly you will be returned "out of stock" without hesitation.
+Sample discord output:
 
-I can't guarantee the accuracy of this script as it's concstantly evolving and things break when new features are added. This certainly checks best buy stock, and i get tons of notifications about switch lites at target, but that's all i can vouch for.
-
+![Discord](./img/discord.png "Discord")
 
 # Notes:
 
-There will always be a delay after each walmart link. If you have lots of walmart links and want to adjust that delay, search for `time.sleep(5)` in the walmart section of the end of the file and change the 5 to a different number. Remember if you load pages too quickly the stock is automatically considered out of stock and you will not receive a notification even if it comes in stock. 
+Remember: This code is not perfect, there will be bugs, glitches, and unhandled exceptions, but if you do everything as you should, with proper URLs and assigning them to webhook destinations, your chances of running into an unhandled exception are slim.
 
+There will always be a delay after each walmart link but I am not perfect and may not have chosen an approriate delay. Remember, at Walmart, if you load pages too quickly the stock is automatically considered out of stock and you will not receive a notification even if it comes in stock. The other solution is a rotating proxy which I have not implemented yet.
 
-The file by default loops ever 1second because it assumes you have walmart links at the end which add more time to the delay. If you don't have any walmart links and it's reloading too quickly, change the time from `time.sleep(1)` at the very end of the file to something more like 10. 
+The script now uses multi-threading, so each URL has its own task and runs in its own thread with its own timer. This means slow/stuck URLs will not impede other URLs ability to load, and additionally you can define different timers for each URL type (if you want to refresh target every 15 seconds but best buy every 20 seconds, for example.)
