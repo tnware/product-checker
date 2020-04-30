@@ -9,11 +9,16 @@
 
 ### Requirements:
 
+- Python 3
 - `pip install requests` (should already be installed if you used Bird Bot)
 - `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
 
 
 # How To Use
+
+Simply `git clone` or download ZIP of this repository and navigate to the root of "product-checker-master".
+
+Execute `python app.py`
 
 When you launch the script you will be given a menu:
 
