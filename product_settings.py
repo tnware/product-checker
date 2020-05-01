@@ -87,6 +87,7 @@ class WebhookSettings(wx.Frame):
     def OnUpdate(self, event):
 
         urldict = return_data("./data/products.json")
+        webhook_dict = return_data("./data/webhooks.json")
         sel = self.listbox.GetSelection()
         product_url = self.listbox.GetString(sel)
         product_to_update = urldict[product_url]
@@ -131,7 +132,7 @@ class ChangeWebhookDialog(wx.Dialog):
 
 
     def InitUI(self):
-
+        webhook_dict = return_data("./data/webhooks.json")
         pnl = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         sb = wx.StaticBox(pnl, label='Select a Webhook Destintion')
