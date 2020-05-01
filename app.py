@@ -11,6 +11,8 @@ from urllib.parse import parse_qs
 import webhook_settings
 import product_settings
 from threading import Thread
+from selenium import webdriver
+from chromedriver_py import binary_path as driver_path
 stockdict = {}
 sku_dict = {}
 bestbuylist = []
@@ -18,6 +20,7 @@ targetlist = []
 walmartlist = []
 bhlist = []
 bbdict = {}
+amazonlist = []
 
 #Function for start-up menu
 
@@ -51,6 +54,42 @@ webhook_dict = return_data("./data/webhooks.json")
 urldict = return_data("./data/products.json")
 
 #Declare classes for the webpage scraping functionality
+
+
+class Amazon:
+
+    def __init__(self, url, hook):
+        self.url = url
+        self.hook = hook
+        webhook_url = webhook_dict[hook]
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        options = webdriver.ChromeOptions()
+        options.add_argument('--ignore-certificate-errors')
+        #options.add_argument("--test-type")
+        options.add_argument("headless")
+        options.add_argument('log-level=3')
+        driver = webdriver.Chrome( executable_path=driver_path, chrome_options=options)
+        driver.get(url)
+
+        #html = driver.page_source
+        status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
+        status_text = status_raw.text
+        title_raw = driver.find_element_by_xpath("//h1[@class='a-size-large a-spacing-none']")
+        title_text = title_raw.text
+        title = title_text
+
+        if "Currently, there are no sellers that can deliver this item to your location." not in status_text:
+            print("[" + current_time + "] " + "In Stock: (Amazon.com) " + title + " - " + url)
+            slack_data = {'content': current_time + " " + title + " in stock at Amazon - " + url}
+            if stockdict.get(url) == 'False':
+                response = requests.post(
+                webhook_url, data=json.dumps(slack_data),
+                headers={'Content-Type': 'application/json'})
+            stockdict.update({url: 'True'})
+        else:
+            print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
+            stockdict.update({url: 'False'})
 
 class Target:
 
@@ -169,9 +208,17 @@ class BH:
 for url in urldict:
     hook = urldict[url] #get the hook for the url so it can be passed in to the per-site lists being generated below
 
+    #Amazon URL Detection
+    if "amazon.com" in url:
+        if "offer-listing" in url:
+            amazonlist.append(url)
+            print("Amazon detected using Webhook destination " + hook)
+        else:
+            print("Invalid Amazon link detected. Please use the Offer Listing page.")
+
     #BestBuy URL Detection
-    if "bestbuy.com" in url:
-        print("BestBuy URL dected using Webhook destination " + hook)
+    elif "bestbuy.com" in url:
+        print("BestBuy URL detected using Webhook destination " + hook)
         parsed = urlparse.urlparse(url)
         sku = parse_qs(parsed.query)['skuId']
         sku = sku[0]
@@ -193,17 +240,17 @@ for url in urldict:
     #Target URL Detection
     elif "target.com" in url:
         targetlist.append(url)
-        print("Target URL dected using Webhook destination " + hook)
+        print("Target URL detected using Webhook destination " + hook)
 
     #Walmart URL Detection
     elif "walmart.com" in url:
         walmartlist.append(url)
-        print("Walmart URL dected using Webhook destination " + hook)
+        print("Walmart URL detected using Webhook destination " + hook)
 
     #B&H Photo URL Detection
     elif "bhphotovideo.com" in url:
         bhlist.append(url)
-        print("B&H URL dected using Webhook destination " + hook)
+        print("B&H URL detected using Webhook destination " + hook)
 
 #set all URLs to be "out of stock" to begin
 for url in urldict:
@@ -213,6 +260,13 @@ for sku in sku_dict:
     stockdict.update({sku: 'False'})
     
 #DECLARE SITE FUNCTIONS
+
+def amzfunc(url):
+    while True:
+        hook = "webhook_1"
+        Amazon(url, hook)
+        time.sleep(10)
+
 
 def targetfunc(url):
     while True:
@@ -240,6 +294,11 @@ def walmartfunc(url):
 
 
 # MAIN EXECUTION
+
+for url in amazonlist:
+    t = Thread(target=amzfunc, args=(url,))
+    t.start()
+    time.sleep(0.5)
 
 for url in targetlist:
     t = Thread(target=targetfunc, args=(url,))
