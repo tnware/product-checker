@@ -363,7 +363,7 @@ def walmartfunc(url):
             Walmart(url, hook)
         except:
             print("Some error ocurred parsing WalMart")
-        time.sleep(20)
+        time.sleep(10)
 
 
 # MAIN EXECUTION
@@ -397,4 +397,3 @@ for url in walmartlist:
     t = Thread(target=walmartfunc, args=(url,))
     t.start()
     time.sleep(0.5)
-    time.sleep(12)
