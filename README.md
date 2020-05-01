@@ -3,6 +3,7 @@
 ### Supports
 
 - Amazon (specific offer-page listings only, more in the notes section at bottom)
+- Gamestop
 - Target
 - BestBuy
 - B&H Photo/Video

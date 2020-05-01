@@ -21,6 +21,7 @@ walmartlist = []
 bhlist = []
 bbdict = {}
 amazonlist = []
+gamestoplist = []
 
 #Function for start-up menu
 
@@ -94,6 +95,44 @@ class Amazon:
             else:
                 print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
                 stockdict.update({url: 'False'})
+        driver.quit()
+
+class Gamestop:
+
+    def __init__(self, url, hook):
+        self.url = url
+        self.hook = hook
+        webhook_url = webhook_dict[hook]
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_argument('log-level=3')
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
+        options.add_argument("headless")
+        driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
+        driver.get(url)
+
+        html = driver.page_source
+
+        status_raw = driver.find_element_by_xpath("//div[@class='add-to-cart-buttons']")
+        status_text = status_raw.text
+        title_raw = driver.find_element_by_xpath("//h1[@class='product-name h2']")
+        title_text = title_raw.text
+        title = title_text
+
+        if "ADD TO CART" in status_text:
+            print("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url)
+            slack_data = {'content': current_time + " " + title + " in stock at Gamestop - " + url}
+            if stockdict.get(url) == 'False':
+                response = requests.post(
+                webhook_url, data=json.dumps(slack_data),
+                headers={'Content-Type': 'application/json'})
+            stockdict.update({url: 'True'})
+        else:
+            print("[" + current_time + "] " + "Sold Out: (Gamestop.com) " + title)
+            stockdict.update({url: 'False'})
         driver.quit()
 
 class Target:
@@ -221,6 +260,11 @@ for url in urldict:
         else:
             print("Invalid Amazon link detected. Please use the Offer Listing page.")
 
+   #Target URL Detection
+    elif "gamestop.com" in url:
+        gamestoplist.append(url)
+        print("Gamestop URL detected using Webhook destination " + hook)
+
     #BestBuy URL Detection
     elif "bestbuy.com" in url:
         print("BestBuy URL detected using Webhook destination " + hook)
@@ -268,11 +312,20 @@ for sku in sku_dict:
 
 def amzfunc(url):
     while True:
-        hook = "webhook_1"
+        hook = urldict[url]
         try:
             Amazon(url, hook)
         except:
             print("Some error ocurred parsing Amazon")
+        time.sleep(10)
+
+def gamestopfunc(url):
+    while True:
+        hook = urldict[url]
+        try:
+            Gamestop(url, hook)
+        except:
+            print("Some error ocurred parsing Gamestop")
         time.sleep(10)
 
 
@@ -317,6 +370,11 @@ def walmartfunc(url):
 
 for url in amazonlist:
     t = Thread(target=amzfunc, args=(url,))
+    t.start()
+    time.sleep(0.5)
+
+for url in gamestoplist:
+    t = Thread(target=gamestopfunc, args=(url,))
     t.start()
     time.sleep(0.5)
 
