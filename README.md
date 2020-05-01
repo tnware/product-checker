@@ -3,7 +3,7 @@
 ### Supports
 
 - Amazon (specific offer-page listings only, more in the notes section at bottom)
-- Gamestop
+- Gamestop (very slow to refresh in selenium in my tests)
 - Target
 - BestBuy
 - B&H Photo/Video
@@ -15,7 +15,7 @@
 - Python 3
 - `pip install requests` (should already be installed if you used Bird Bot)
 - `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
-- `pip install selenium` (Right now used for Amazon links)
+- `pip install selenium` (Right now used for Amazon/Gamestop links)
 - `pip install chromedriver-py==81.0.4044.69` (Used with selenium)
 
 If you used birdbot you should already have the selenium and chromedriver_py packages.
@@ -84,7 +84,7 @@ Sample discord output:
 
 Remember: This code is not perfect, there will be bugs, glitches, and unhandled exceptions, but if you do everything as you should, with proper URLs and assigning them to webhook destinations, your chances of running into an unhandled exception are slim.
 
-The amazon offer pages must show no other listings for the script to trigger appropriately. There are some links floating around that show 0 stock until it's being sold by amazon at MSRP. These are the links you want to use here. You can not use product page links, the script will reject those. And if you use product page links with marketplace sellers, the script will trigger an "in stock" status because it can see those listings.
+The amazon offer pages must show no other listings for the script to trigger appropriately. There are some links floating around that show 0 stock until it's being sold by amazon at MSRP. These are the links you want to use here. You can not use product page links, the script will reject those. And if you use offers page links with marketplace sellers, the script will trigger an "in stock" status because it can see those listings.
 
 There will always be a delay after each walmart link but I am not perfect and may not have chosen an approriate delay. Remember, at Walmart, if you load pages too quickly the stock is automatically considered out of stock and you will not receive a notification even if it comes in stock. The other solution is a rotating proxy which I have not implemented yet.
 
