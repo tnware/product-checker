@@ -28,7 +28,7 @@ class WebhookSettings(wx.Frame):
         self.InitUI()
 
     def InitUI(self):
-
+        webhook_dict = return_data("./data/webhooks.json")
         panel = wx.Panel(self)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
 

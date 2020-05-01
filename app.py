@@ -67,24 +67,27 @@ class Amazon:
         driver = webdriver.PhantomJS( executable_path=driver_path)
         driver.get(url)
 
-        #html = driver.page_source
-        status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
-        status_text = status_raw.text
-        title_raw = driver.find_element_by_xpath("//h1[@class='a-size-large a-spacing-none']")
-        title_text = title_raw.text
-        title = title_text
+        html = driver.page_source
+        if "To discuss automated access to Amazon data please contact api-services-support@amazon.com." in html:
+            print("Amazons Bot Protection is preventing this call.")
+        else: 
+            status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
+            status_text = status_raw.text
+            title_raw = driver.find_element_by_xpath("//h1[@class='a-size-large a-spacing-none']")
+            title_text = title_raw.text
+            title = title_text
 
-        if "Currently, there are no sellers that can deliver this item to your location." not in status_text:
-            print("[" + current_time + "] " + "In Stock: (Amazon.com) " + title + " - " + url)
-            slack_data = {'content': current_time + " " + title + " in stock at Amazon - " + url}
-            if stockdict.get(url) == 'False':
-                response = requests.post(
-                webhook_url, data=json.dumps(slack_data),
-                headers={'Content-Type': 'application/json'})
-            stockdict.update({url: 'True'})
-        else:
-            print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
-            stockdict.update({url: 'False'})
+            if "Currently, there are no sellers that can deliver this item to your location." not in status_text:
+                print("[" + current_time + "] " + "In Stock: (Amazon.com) " + title + " - " + url)
+                slack_data = {'content': current_time + " " + title + " in stock at Amazon - " + url}
+                if stockdict.get(url) == 'False':
+                    response = requests.post(
+                    webhook_url, data=json.dumps(slack_data),
+                    headers={'Content-Type': 'application/json'})
+                stockdict.update({url: 'True'})
+            else:
+                print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
+                stockdict.update({url: 'False'})
         driver.quit()
 
 class Target:
@@ -264,7 +267,7 @@ def amzfunc(url):
             Amazon(url, hook)
         except:
             print("Some error ocurred parsing Amazon")
-        time.sleep(8)
+        time.sleep(15)
 
 
 def targetfunc(url):
@@ -309,7 +312,7 @@ def walmartfunc(url):
 for url in amazonlist:
     t = Thread(target=amzfunc, args=(url,))
     t.start()
-    time.sleep(0.5)
+    time.sleep(2)
 
 for url in targetlist:
     t = Thread(target=targetfunc, args=(url,))
