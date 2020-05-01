@@ -66,9 +66,9 @@ class Amazon:
         current_time = now.strftime("%H:%M:%S")
         options = webdriver.ChromeOptions()
         options.add_argument('--ignore-certificate-errors')
-        #options.add_argument("--test-type")
         options.add_argument("headless")
         options.add_argument('log-level=3')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
         driver = webdriver.Chrome( executable_path=driver_path, chrome_options=options)
         driver.get(url)
 
