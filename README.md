@@ -15,9 +15,7 @@
 - `pip install requests` (should already be installed if you used Bird Bot)
 - `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
 - `pip install selenium` (Right now used for Amazon links)
-- `pip install chromedriver_py` (Used with selenium)
-
-If you used birdbot you should already have the selenium and chromedriver_py packages.
+- `pip install phantomjs-binary` (Used with selenium) (replaces chrome driver due to amazon issues)
 
 (if pip does not work try pip3)
 

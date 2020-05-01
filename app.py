@@ -12,7 +12,7 @@ import webhook_settings
 import product_settings
 from threading import Thread
 from selenium import webdriver
-from chromedriver_py import binary_path as driver_path
+from phantomjs_bin import executable_path as driver_path
 stockdict = {}
 sku_dict = {}
 bestbuylist = []
@@ -64,12 +64,7 @@ class Amazon:
         webhook_url = webhook_dict[hook]
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        options = webdriver.ChromeOptions()
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument("headless")
-        options.add_argument('log-level=3')
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome( executable_path=driver_path, chrome_options=options)
+        driver = webdriver.PhantomJS( executable_path=driver_path)
         driver.get(url)
 
         #html = driver.page_source
@@ -90,6 +85,7 @@ class Amazon:
         else:
             print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
             stockdict.update({url: 'False'})
+        driver.quit()
 
 class Target:
 
@@ -268,7 +264,7 @@ def amzfunc(url):
             Amazon(url, hook)
         except:
             print("Some error ocurred parsing Amazon")
-        time.sleep(10)
+        time.sleep(8)
 
 
 def targetfunc(url):
