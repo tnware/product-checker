@@ -12,7 +12,7 @@ import webhook_settings
 import product_settings
 from threading import Thread
 from selenium import webdriver
-from phantomjs_bin import executable_path as driver_path
+from chromedriver_py import binary_path as driver_path
 stockdict = {}
 sku_dict = {}
 bestbuylist = []
@@ -64,7 +64,13 @@ class Amazon:
         webhook_url = webhook_dict[hook]
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        driver = webdriver.PhantomJS( executable_path=driver_path)
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_argument('log-level=3')
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
+        options.add_argument("headless")
+        driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
         driver.get(url)
 
         html = driver.page_source
@@ -267,7 +273,7 @@ def amzfunc(url):
             Amazon(url, hook)
         except:
             print("Some error ocurred parsing Amazon")
-        time.sleep(15)
+        time.sleep(10)
 
 
 def targetfunc(url):
@@ -312,7 +318,7 @@ def walmartfunc(url):
 for url in amazonlist:
     t = Thread(target=amzfunc, args=(url,))
     t.start()
-    time.sleep(2)
+    time.sleep(0.5)
 
 for url in targetlist:
     t = Thread(target=targetfunc, args=(url,))
