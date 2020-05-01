@@ -264,32 +264,47 @@ for sku in sku_dict:
 def amzfunc(url):
     while True:
         hook = "webhook_1"
-        Amazon(url, hook)
+        try:
+            Amazon(url, hook)
+        except:
+            print("Some error ocurred parsing Amazon")
         time.sleep(10)
 
 
 def targetfunc(url):
     while True:
         hook = urldict[url]
-        Target(url, hook)
+        try:
+            Target(url, hook)
+        except:
+            print("Some error ocurred parsing Target")
         time.sleep(10)
 
 def bhfunc(url):
     while True:
         hook = urldict[url]
-        BH(url, hook)
+        try:
+            BH(url, hook)
+        except:
+            print("Some error ocurred parsing BH Photo")
         time.sleep(10)
 
 def bestbuyfunc(sku):
     while True:
         hook = bbdict[sku]
-        BestBuy(sku, hook)
+        try:
+            BestBuy(sku, hook)
+        except:
+            print("Some error ocurred parsing Best Buy")
         time.sleep(10)
 
 def walmartfunc(url):
     while True:
         hook = urldict[url]
-        Walmart(url, hook)
+        try:
+            Walmart(url, hook)
+        except:
+            print("Some error ocurred parsing WalMart")
         time.sleep(20)
 
 
