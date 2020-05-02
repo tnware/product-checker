@@ -213,10 +213,12 @@ class Walmart:
         tree = html.fromstring(page.content)
         title_raw = tree.xpath("//h1[@class='prod-ProductTitle font-normal']")
         title = title_raw[0].text
+        price_raw = tree.xpath("//span[@class='price display-inline-block arrange-fit price price--stylized']//span[@class='price-characteristic']")
+        price = price_raw[0].text
         if page.status_code == 200:
             if "Add to cart" in page.text:
-                print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " - " + url)
-                slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart " + url}
+                print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
+                slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart for $" + price + " - " + url}
                 if stockdict.get(url) == 'False':
                     try:
                         response = requests.post(
