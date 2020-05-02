@@ -164,12 +164,15 @@ class ChangeWebhookDialog(wx.Dialog):
 
     def update(self, e):
         url_key = listbox.GetSelection()
-        url = listbox.GetString(url_key)
-        new_webhook_key = combo.GetSelection()
-        new_webhook = combo.GetString(new_webhook_key)
-        print(url, new_webhook)
-        urldict.update({url: new_webhook})
-        set_data("./data/products.json", url, new_webhook)
+        if url_key == -1:
+            print("An error ocurred. Did you select a URL before clicking configure?")
+        else:
+            url = listbox.GetString(url_key)
+            new_webhook_key = combo.GetSelection()
+            new_webhook = combo.GetString(new_webhook_key)
+            print(url, new_webhook)
+            urldict.update({url: new_webhook})
+            set_data("./data/products.json", url, new_webhook)
         self.Destroy()
 
     def OnClose(self, e):
