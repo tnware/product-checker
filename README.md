@@ -18,9 +18,10 @@
 - `pip install selenium` (Right now used for Amazon/Gamestop links)
 - `pip install chromedriver-py==81.0.4044.69` (Used with selenium)
 
-If you used birdbot you should already have the selenium and chromedriver_py packages.
-
+To speed this up, just run `pip install -r requirements.txt`
 (if pip does not work try pip3)
+
+If you used birdbot you should already have these installed, aside from wxpython which you will still need to install.
 
 # How To Use
 
