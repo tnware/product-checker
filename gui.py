@@ -22,6 +22,10 @@ sku_dict = {}
 bestbuylist = []
 bbdict = {}
 products = []
+#put maxprice to 0 for defaults (any), set it to a plain number for example 300 with no quotes to ignore anything that is listed over 300.
+#only applies to walmart URLs for right now
+#maxprice = 300
+maxprice = 0
 
 #set all URLs to be "out of stock" to begin
 def return_data(path):
@@ -246,12 +250,23 @@ class Walmart:
                 app_log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
                 slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart for $" + price + " - " + url}
                 if stockdict.get(url) == 'False':
-                    try:
-                        response = requests.post(
-                        webhook_url, data=json.dumps(slack_data),
-                        headers={'Content-Type': 'application/json'})
-                    except:
-                        print("Webhook sending failed. Invalid URL configured.")
+                    if maxprice != 0:
+                        if int(price) > maxprice:
+                            print("in stock but not MSRP")
+                        else:
+                            try:
+                                response = requests.post(
+                                webhook_url, data=json.dumps(slack_data),
+                                headers={'Content-Type': 'application/json'})
+                            except:
+                                print("Webhook sending failed. Invalid URL configured.")
+                    else:
+                        try:
+                            response = requests.post(
+                            webhook_url, data=json.dumps(slack_data),
+                            headers={'Content-Type': 'application/json'})
+                        except:
+                            print("Webhook sending failed. Invalid URL configured.")
                 stockdict.update({url: 'True'})
             else: 
                 print("[" + current_time + "] " + "Sold Out: (Walmart.com) " + title)
