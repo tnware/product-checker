@@ -17,6 +17,7 @@
 - `pip install wxpython` (GUI library for the URL and Webhook manager wrappers)
 - `pip install selenium` (Right now used for Amazon/Gamestop links)
 - `pip install chromedriver-py==81.0.4044.69` (Used with selenium)
+- `pip install lxml`
 
 To speed this up, just run `pip install -r requirements.txt`
 (if pip does not work try pip3)
