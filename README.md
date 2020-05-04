@@ -8,6 +8,8 @@
 - BestBuy
 - B&H Photo/Video
 - Walmart (requires a waiting period between page loads or a rotating proxy (not supported within the script) to get accurate stock results)
+  - New for Walmart links: MAX PRICE. You can set a threshold so you won't be notified if the in-stock product comes in above that number. Useful since Walmart has marketplace sellers with higher-than MSRP.
+    - edit `gui.py` in a Text Editor and change `maxprice = 0` to `maxprice = 300` (at the top section of the script) and then you won't receive walmart notifications for anything above 300
 
 ### Requirements:
 
@@ -23,6 +25,17 @@ To speed this up, just run `pip install -r requirements.txt`
 (if pip does not work try pip3)
 
 If you used birdbot you should already have these installed, aside from wxpython which you will still need to install.
+
+### BETA Gui for Windows.
+
+- Not working on Mac
+- Not tested on Linux
+
+![BETA GUI](./img/gui.png "Beta GUI")
+
+Run `python gui.py` to use the beta GUI. 
+
+All functionality remains in app.py which is covered below.
 
 # How To Use
 
