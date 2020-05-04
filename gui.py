@@ -383,6 +383,7 @@ class GUI(wx.Frame):
         addBtn = wx.Button(leftPanel, label='Add Product URL')
         editBtn = wx.Button(leftPanel, label='Edit Highlighted Item')
         appBtn = wx.Button(leftPanel, label='Start Selected Jobs')
+        strtAllBtn = wx.Button(leftPanel, label='Start ALL Jobs')
         app2Btn = wx.Button(leftPanel, label='Stop All Jobs')
         delBtn = wx.Button(leftPanel, label='Delete Highlighted Item')
 
@@ -392,6 +393,7 @@ class GUI(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.StopAll, id=app2Btn.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnChangeDepth, id=editBtn.GetId())
         self.Bind(wx.EVT_BUTTON, self.AddURLs, id=addBtn.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnRunAll, id=strtAllBtn.GetId())
         self.Bind(wx.EVT_BUTTON, self.webhook_button, id=whBtn.GetId())
         self.Bind(wx.EVT_BUTTON, self.DeleteURL, id=delBtn.GetId())
 
@@ -403,6 +405,7 @@ class GUI(wx.Frame):
         vbox2.Add(selBtn, 0, wx.BOTTOM, 5)
         vbox2.Add(desBtn, 0, wx.BOTTOM, 25)
         vbox2.Add(appBtn, 0, wx.BOTTOM, 5)
+        vbox2.Add(strtAllBtn, 0, wx.BOTTOM, 5)
         vbox2.Add(app2Btn, 0, wx.BOTTOM, 5)
 
         leftPanel.SetSizer(vbox2)
@@ -438,6 +441,15 @@ class GUI(wx.Frame):
                     prod_list.SetItem(i, 2, "Stopping")
                     colour = wx.Colour(255, 0, 0, 255)
                     prod_list.SetItemTextColour(i, colour)
+
+
+    def RunAll(self, event):
+        num = prod_list.GetItemCount()
+        for i in range(num):
+            if prod_list.GetItemText(i, col=2) == "Inactive":
+                url = prod_list.GetItemText(i, col=0)
+                hook = prod_list.GetItemText(i, col=1)
+                RunJob(url, hook, i)
 
     def StopAll(self, event):
         num = prod_list.GetItemCount()
@@ -505,6 +517,11 @@ class GUI(wx.Frame):
 
         app_log.AppendText("Processing Selections..." + '\n')
         t = Thread(target=self.CheckURLs, args=(self,))
+        t.start()
+
+    def OnRunAll(self, event):
+        app_log.AppendText("Processing Selections..." + '\n')
+        t = Thread(target=self.RunAll, args=(self,))
         t.start()
 
 def write_log(string):
