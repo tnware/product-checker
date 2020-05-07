@@ -4,7 +4,7 @@
 
 - Amazon (specific offer-page listings only, more in the notes section at bottom)
 - Gamestop (very slow to refresh in selenium in my tests)
-- Target
+- Target (The product's listing should read "Temporarily out of stock" for this to work properly, for now. It might say something like "Sold out" sometimes but I'm not sure)
 - BestBuy
 - B&H Photo/Video
 - Walmart (requires a waiting period between page loads or a rotating proxy (not supported within the script) to get accurate stock results)
