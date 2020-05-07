@@ -11,7 +11,10 @@ from threading import Thread
 from selenium import webdriver
 from chromedriver_py import binary_path as driver_path
 from lxml import html
-
+#put maxprice to 0 for defaults (any), set it to a plain number for example 300 with no quotes to ignore anything that is listed over 300.
+#only applies to walmart URLs for right now
+#maxprice = 300
+maxprice = 0
 
 ###########################################################################
 ## Class WebhookManager
@@ -20,7 +23,7 @@ from lxml import html
 class WebhookManager ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 354,199 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Manage Webhooks", pos = wx.DefaultPosition, size = wx.Size( 354,199 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -132,7 +135,6 @@ class WebhookManager ( wx.Frame ):
 		webhook_dict = return_data("./data/webhooks.json")
 
 
-
 ###########################################################################
 ## Class WebhookDialog
 ###########################################################################
@@ -140,7 +142,7 @@ class WebhookManager ( wx.Frame ):
 class WebhookDialog ( wx.Dialog ):
 
 	def __init__( self, parent ):
-		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 201,103 ), style = wx.DEFAULT_DIALOG_STYLE )
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Assign Webhook", pos = wx.DefaultPosition, size = wx.Size( 201,103 ), style = wx.DEFAULT_DIALOG_STYLE )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -195,10 +197,14 @@ class WebhookDialog ( wx.Dialog ):
 		pass
 
 
+###########################################################################
+## Class GUI
+###########################################################################
+
 class GUI ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 1009,521 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Product Checker", pos = wx.DefaultPosition, size = wx.Size( 1009,521 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -636,7 +642,7 @@ def amzfunc(url, hook, i):
                     write_log("An error ocurred parsing Amazon")
                 time.sleep(10)
             else:
-                print("Aborting thread")
+                print("Aborted Thread")
                 colour = wx.Colour(0, 0, 0, 255)
                 ex.list.SetItemTextColour(i, colour)
                 ex.list.SetItem(i, 2, "Inactive")
@@ -656,7 +662,7 @@ def bestbuyfunc(sku, hook, i):
                     write_log("An error ocurred parsing BestBuy")
                 time.sleep(10)
             else:
-                print("Aborting thread")
+                print("Aborted Thread")
                 colour = wx.Colour(0, 0, 0, 255)
                 ex.list.SetItemTextColour(i, colour)
                 ex.list.SetItem(i, 2, "Inactive")
@@ -676,7 +682,7 @@ def gamestopfunc(url, hook, i):
                     write_log("An error ocurred parsing Gamestop")
                 time.sleep(10)
             else:
-                print("Aborting thread")
+                print("Aborted Thread")
                 colour = wx.Colour(0, 0, 0, 255)
                 ex.list.SetItemTextColour(i, colour)
                 ex.list.SetItem(i, 2, "Inactive")
@@ -696,7 +702,7 @@ def targetfunc(url, hook, i):
                     write_log("An error ocurred parsing Target")
                 time.sleep(10)
             else:
-                print("Aborting thread")
+                print("Aborted Thread")
                 colour = wx.Colour(0, 0, 0, 255)
                 ex.list.SetItemTextColour(i, colour)
                 ex.list.SetItem(i, 2, "Inactive")
@@ -717,7 +723,7 @@ def walmartfunc(url, hook, i):
                     write_log("An error ocurred parsing Walmart")
                 time.sleep(10)
             else:
-                print("Aborting thread")
+                print("Aborted Thread")
                 colour = wx.Colour(0, 0, 0, 255)
                 ex.list.SetItemTextColour(i, colour)
                 ex.list.SetItem(i, 2, "Inactive")
