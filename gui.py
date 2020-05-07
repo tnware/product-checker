@@ -204,7 +204,7 @@ class WebhookDialog ( wx.Dialog ):
 class GUI ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Product Checker", pos = wx.DefaultPosition, size = wx.Size( 1009,521 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Product Checker", pos = wx.DefaultPosition, size = wx.Size( 1009,660 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -214,7 +214,7 @@ class GUI ( wx.Frame ):
 		vbox2 = wx.BoxSizer( wx.VERTICAL )
 
 		self.icon = wx.StaticBitmap( self.leftPanel, wx.ID_ANY, wx.Bitmap( u"img/icon.png", wx.BITMAP_TYPE_ANY ), wx.DefaultPosition, wx.DefaultSize, 0 )
-		vbox2.Add( self.icon, 0, wx.ALL|wx.EXPAND, 5 )
+		vbox2.Add( self.icon, 0, wx.ALL|wx.EXPAND, 15 )
 
 		self.whBtn = wx.Button( self.leftPanel, wx.ID_ANY, u"Manage Webhooks", wx.DefaultPosition, wx.DefaultSize, 0 )
 		vbox2.Add( self.whBtn, 0, wx.ALL|wx.EXPAND, 5 )
@@ -233,6 +233,9 @@ class GUI ( wx.Frame ):
 
 		self.app2Btn = wx.Button( self.leftPanel, wx.ID_ANY, u"STOP All Jobs", wx.DefaultPosition, wx.DefaultSize, 0 )
 		vbox2.Add( self.app2Btn, 0, wx.ALL|wx.EXPAND, 5 )
+
+
+		vbox2.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 
 		self.leftPanel.SetSizer( vbox2 )
@@ -258,8 +261,12 @@ class GUI ( wx.Frame ):
 
 		self.SetSizer( hbox )
 		self.Layout()
+		self.statusBar = self.CreateStatusBar( 1, wx.STB_SIZEGRIP, wx.ID_ANY )
 		self.m_menubar1 = wx.MenuBar( 0 )
 		self.menuFile = wx.Menu()
+		self.exitItem = wx.MenuItem( self.menuFile, wx.ID_ANY, u"Exit", wx.EmptyString, wx.ITEM_NORMAL )
+		self.menuFile.Append( self.exitItem )
+
 		self.m_menubar1.Append( self.menuFile, u"File" )
 
 		self.menuHelp = wx.Menu()
@@ -277,6 +284,7 @@ class GUI ( wx.Frame ):
 		self.delBtn.Bind( wx.EVT_BUTTON, self.DeleteURL )
 		self.strtAllBtn.Bind( wx.EVT_BUTTON, self.OnRunAll )
 		self.app2Btn.Bind( wx.EVT_BUTTON, self.StopAll )
+		self.Bind( wx.EVT_MENU, self.OnClose, id = self.exitItem.GetId() )
 
 	def __del__( self ):
 		pass
