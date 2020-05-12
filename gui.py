@@ -849,96 +849,110 @@ def RunJob(url, hook, i):
 
 	#Amazon URL Detection
 	if "amazon.com" in url:
-		active_status = ex.list.GetItemText(i, col=2)
-		if "offer-listing" in url:
+		try:
+			active_status = ex.list.GetItemText(i, col=2)
+			if "offer-listing" in url:
+				if active_status != "Active":
+					colour = wx.Colour(0, 255, 0, 255)
+					ex.list.SetItemTextColour(i, colour)
+					ex.list.SetItem(i, 2, "Active")
+					print("Amazon URL detected using Webhook destination " + hook)
+					write_log(("Amazon URL detected -> " + hook))
+					t = Thread(target=amzfunc, args=(url, hook, i))
+					t.start()
+					time.sleep(0.5)
+			else:
+				print("Invalid Amazon link detected. Please use the Offer Listing page.")
+		except:
+			print("Error processing URL: " + url)
+	#Target URL Detection
+	elif "gamestop.com" in url:
+		try:
+			active_status = ex.list.GetItemText(i, col=2)
 			if active_status != "Active":
 				colour = wx.Colour(0, 255, 0, 255)
 				ex.list.SetItemTextColour(i, colour)
 				ex.list.SetItem(i, 2, "Active")
-				print("Amazon URL detected using Webhook destination " + hook)
-				write_log(("Amazon URL detected -> " + hook))
-				t = Thread(target=amzfunc, args=(url, hook, i))
+				print("Gamestop URL detected using Webhook destination " + hook)
+				write_log(("GameStop URL detected -> " + hook))
+				t = Thread(target=gamestopfunc, args=(url, hook, i))
 				t.start()
 				time.sleep(0.5)
-		else:
-			print("Invalid Amazon link detected. Please use the Offer Listing page.")
-
-	#Target URL Detection
-	elif "gamestop.com" in url:
-		active_status = ex.list.GetItemText(i, col=2)
-		if active_status != "Active":
-			colour = wx.Colour(0, 255, 0, 255)
-			ex.list.SetItemTextColour(i, colour)
-			ex.list.SetItem(i, 2, "Active")
-			print("Gamestop URL detected using Webhook destination " + hook)
-			write_log(("GameStop URL detected -> " + hook))
-			t = Thread(target=gamestopfunc, args=(url, hook, i))
-			t.start()
-			time.sleep(0.5)
+		except:
+			print("Error processing URL: " + url)
 
 	#BestBuy URL Detection
 	elif "bestbuy.com" in url:
-		print("BestBuy URL detected using Webhook destination " + hook)
-		#ex.log.AppendText("BestBuy URL detected using Webhook destination " + hook + '\n')          
-		parsed = urlparse.urlparse(url)
-		sku = parse_qs(parsed.query)['skuId']
-		sku = sku[0]
-		bestbuylist.append(sku)
-		headers = {
-		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-		"accept-encoding": "gzip, deflate, br",
-		"accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-		"cache-control": "max-age=0",
-		"upgrade-insecure-requests": "1",
-		"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
-		}
-		page = requests.get(url, headers=headers)
-		al = page.text
-		tree = html.fromstring(page.content)
-		img = tree.xpath('//img[@class="primary-image"]/@src')[0]
-		title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
-		sku_dict.update({sku: title})
-		bbdict.update({sku: hook})
-		bbimgdict.update({sku: img})
-		active_status = ex.list.GetItemText(i, col=2)
-		if active_status != "Active":
-			colour = wx.Colour(0, 255, 0, 255)
-			ex.list.SetItemTextColour(i, colour)
-			ex.list.SetItem(i, 2, "Active")
+		try:
 			print("BestBuy URL detected using Webhook destination " + hook)
-			write_log(("BestBuy URL detected -> " + hook))
-			orig_url = url
-			t = Thread(target=bestbuyfunc, args=(sku, orig_url, hook, i))
-			t.start()
-			time.sleep(0.5)
+			#ex.log.AppendText("BestBuy URL detected using Webhook destination " + hook + '\n')          
+			parsed = urlparse.urlparse(url)
+			sku = parse_qs(parsed.query)['skuId']
+			sku = sku[0]
+			bestbuylist.append(sku)
+			headers = {
+			"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+			"accept-encoding": "gzip, deflate, br",
+			"accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+			"cache-control": "max-age=0",
+			"upgrade-insecure-requests": "1",
+			"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
+			}
+			page = requests.get(url, headers=headers)
+			al = page.text
+			tree = html.fromstring(page.content)
+			img = tree.xpath('//img[@class="primary-image"]/@src')[0]
+			title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
+			sku_dict.update({sku: title})
+			bbdict.update({sku: hook})
+			bbimgdict.update({sku: img})
+			active_status = ex.list.GetItemText(i, col=2)
+			if active_status != "Active":
+				colour = wx.Colour(0, 255, 0, 255)
+				ex.list.SetItemTextColour(i, colour)
+				ex.list.SetItem(i, 2, "Active")
+				print("BestBuy URL detected using Webhook destination " + hook)
+				write_log(("BestBuy URL detected -> " + hook))
+				orig_url = url
+				t = Thread(target=bestbuyfunc, args=(sku, orig_url, hook, i))
+				t.start()
+				time.sleep(0.5)
+		except:
+			print("Error processing URL: " + url)
 
 	#Target URL Detection
 	elif "target.com" in url:
-		#targetlist.append(url)
-		active_status = ex.list.GetItemText(i, col=2)
-		if active_status != "Active":
-			colour = wx.Colour(0, 255, 0, 255)
-			ex.list.SetItemTextColour(i, colour)
-			ex.list.SetItem(i, 2, "Active")
-			print("Target URL detected using Webhook destination " + hook)
-			write_log(("Target URL detected -> " + hook))
-			t = Thread(target=targetfunc, args=(url, hook, i))
-			t.start()
-			time.sleep(0.5)
+		try:
+			#targetlist.append(url)
+			active_status = ex.list.GetItemText(i, col=2)
+			if active_status != "Active":
+				colour = wx.Colour(0, 255, 0, 255)
+				ex.list.SetItemTextColour(i, colour)
+				ex.list.SetItem(i, 2, "Active")
+				print("Target URL detected using Webhook destination " + hook)
+				write_log(("Target URL detected -> " + hook))
+				t = Thread(target=targetfunc, args=(url, hook, i))
+				t.start()
+				time.sleep(0.5)
+		except:
+			print("Error processing URL: " + url)
 
 	#Walmart URL Detection
 	elif "walmart.com" in url:
-		#walmartlist.append(url)
-		active_status = ex.list.GetItemText(i, col=2)
-		if active_status != "Active":
-			colour = wx.Colour(0, 255, 0, 255)
-			ex.list.SetItemTextColour(i, colour)
-			ex.list.SetItem(i, 2, "Active")
-			print("Walmart URL detected using Webhook destination " + hook)
-			write_log(("Walmart URL detected -> " + hook))
-			t = Thread(target=walmartfunc, args=(url, hook, i))
-			t.start()
-			time.sleep(0.5)
+		try:
+			#walmartlist.append(url)
+			active_status = ex.list.GetItemText(i, col=2)
+			if active_status != "Active":
+				colour = wx.Colour(0, 255, 0, 255)
+				ex.list.SetItemTextColour(i, colour)
+				ex.list.SetItem(i, 2, "Active")
+				print("Walmart URL detected using Webhook destination " + hook)
+				write_log(("Walmart URL detected -> " + hook))
+				t = Thread(target=walmartfunc, args=(url, hook, i))
+				t.start()
+				time.sleep(0.5)
+		except:
+			print("Error processing URL: " + url)
 
 	#B&H Photo URL Detection
 	elif "bhphotovideo.com" in url:
