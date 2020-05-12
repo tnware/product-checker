@@ -533,7 +533,7 @@ class BestBuy:
 					'embeds': [{ 
 						'title': product_name,  
 						'description': product_name + " in stock at BestBuy", 
-						'url': url, 
+						'url': link, 
 						"fields": [
 						{
 							"name": "Time:",
