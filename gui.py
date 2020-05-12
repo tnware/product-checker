@@ -528,6 +528,7 @@ class BestBuy:
 				#slack_data = {'content': "[" + current_time + "] " +  product_name + " In Stock @ BestBuy " + link}
 				slack_data = {
 					'username': "BestBuy Bot",
+					'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/bestbuy.png",
 					'content': "BestBuy Stock Alert:", 
 					'embeds': [{ 
 						'title': product_name,  
@@ -641,6 +642,7 @@ class Target:
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
 			slack_data = {
 				'username': "Target Bot",
+				'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/target.png",
 				'content': "Target Stock Alert:", 
 				'embeds': [{ 
 					'title': title,  
@@ -690,6 +692,7 @@ class Walmart:
 				ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
 				slack_data = {
 					'username': "Walmart Bot",
+					'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/walmart.png",
 					'content': "Walmart Stock Alert:", 
 					'embeds': [{ 
 						'title': title,  
