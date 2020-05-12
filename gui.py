@@ -398,6 +398,8 @@ class GUI ( wx.Frame ):
 		t.start()
 
 	def OnRunAll(self, event):
+		for url in urldict:
+			stockdict.update({url: 'False'}) 
 		ex.log.AppendText("Processing Selections..." + '\n')
 		t = Thread(target=self.RunAll, args=(self,))
 		t.start()
@@ -572,30 +574,30 @@ class Gamestop:
 
 class Target:
 
-    def __init__(self, url, hook):
-        self.url = url
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        page = requests.get(url)
-        al = page.text
-        title = al[al.find('"twitter":{"title":') + 20 : al.find('","card')]
+	def __init__(self, url, hook):
+		self.url = url
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		page = requests.get(url)
+		al = page.text
+		title = al[al.find('"twitter":{"title":') + 20 : al.find('","card')]
         #print(title)
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        if "Temporarily out of stock" in page.text:
-            print("[" + current_time + "] " + "Sold Out: (Target.com) " + title)
-            #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Target.com) " + title + '\n')
-            stockdict.update({url: 'False'})
-        else: 
-            print("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url)
-            ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
-            slack_data = {'content': "[" + current_time + "] " +  title + " in stock at Target - " + url}
-            if stockdict.get(url) == 'False':
-                response = requests.post(
-                webhook_url, data=json.dumps(slack_data),
-                headers={'Content-Type': 'application/json'})
-            stockdict.update({url: 'True'})
-        #print(stockdict)
+		now = datetime.now()
+		current_time = now.strftime("%H:%M:%S")
+		if "Temporarily out of stock" in page.text:
+			print("[" + current_time + "] " + "Sold Out: (Target.com) " + title)
+			#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Target.com) " + title + '\n')
+			stockdict.update({url: 'False'})
+		else: 
+			print("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url)
+			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
+			slack_data = {'content': "[" + current_time + "] " +  title + " in stock at Target - " + url}
+			if stockdict.get(url) == 'False':
+				response = requests.post(
+				webhook_url, data=json.dumps(slack_data),
+				headers={'Content-Type': 'application/json'})
+			stockdict.update({url: 'True'})
+		#print(stockdict)
 
 class Walmart:
 
@@ -609,13 +611,15 @@ class Walmart:
 		title = title_raw[0].text
 		price_raw = tree.xpath("//span[@class='price display-inline-block arrange-fit price price--stylized']//span[@class='price-characteristic']")
 		price = price_raw[0].text
+		img_raw = tree.xpath("//meta[@property='og:image']/@content")
+		img = img_raw[0]
 		now = datetime.now()
 		current_time = now.strftime("%H:%M:%S")
 		if page.status_code == 200:
 			if "Add to cart" in page.text:
 				print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
 				ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
-				slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart for $" + price + " - " + url}
+				slack_data = {'content': "[" + current_time + "] " +  "Walmart Stock Alert:", 'embeds': [{ 'title': title,  "description": title + " in stock at Walmart for $" + price, 'url': url, 'thumbnail': { 'url': img}}]}
 				if stockdict.get(url) == 'False':
 					if maxprice != 0:
 						if int(price) > maxprice:
