@@ -619,7 +619,23 @@ class Walmart:
 			if "Add to cart" in page.text:
 				print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
 				ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
-				slack_data = {'content': "[" + current_time + "] " +  "Walmart Stock Alert:", 'embeds': [{ 'title': title,  "description": title + " in stock at Walmart for $" + price, 'url': url, 'thumbnail': { 'url': img}}]}
+				slack_data = {
+					'content': "[" + current_time + "] " +  "Walmart Stock Alert:", 
+					'embeds': [{ 
+						'title': title,  
+						'description': title + " in stock at Walmart for $" + price, 
+						'url': url, 
+						"fields": [
+						{
+							"name": "Price:",
+							"value": "$" + price
+						}
+					],
+						'thumbnail': { 
+							'url': img
+							}
+						}]
+					}
 				if stockdict.get(url) == 'False':
 					if maxprice != 0:
 						if int(price) > maxprice:
