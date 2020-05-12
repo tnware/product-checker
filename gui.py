@@ -1,3 +1,8 @@
+#/usr/bin/python3
+# https://github.com/tnware/product-checker
+# by Tyler Woods
+# coded for Bird Bot and friends
+# https://tylermade.net
 # -*- coding: utf-8 -*-
 import wx
 import wx.xrc
@@ -166,9 +171,11 @@ class WebhookDialog ( wx.Dialog ):
 
 		# Connect Events
 		self.okButton.Bind( wx.EVT_BUTTON, self.update )
+		
 		webhook_dict = return_data("./data/webhooks.json")
 		for k in webhook_dict:
 			self.combo.Append(k)
+      
 	def update(self, e):
 		try:
 			selected = ex.list.GetFocusedItem()
@@ -186,8 +193,9 @@ class WebhookDialog ( wx.Dialog ):
 				print("select a webhook first")
 		except:
 			print("An error ocurred. Did you select a URL before clicking Edit?")
-			self.Destroy()
-		self.Destroy()
+			self.Close()
+		self.Close()
+
 
 	def OnClose(self, e):
 
@@ -349,6 +357,7 @@ class GUI ( wx.Frame ):
 				file.close()
 				urldict = return_data("./data/products.json")
 
+
 	def OnChangeWebhook(self, e):
 		webhook_dict = return_data("./data/webhooks.json")
 		selected = ex.list.GetFocusedItem()
@@ -431,8 +440,8 @@ class Amazon:
 
         html = driver.page_source
         if "To discuss automated access to Amazon data please contact api-services-support@amazon.com." in html:
-            print("Amazons Bot Protection is preventing this call.")
-            ex.log.AppendText("Amazons Bot Protection prevented a refresh." + '\n')
+            print("Amazon's Bot Protection is preventing this call.")
+            ex.log.AppendText("Amazon's Bot Protection prevented a refresh." + '\n')
         else: 
             status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
             status_text = status_raw.text
@@ -590,46 +599,46 @@ class Target:
 
 class Walmart:
 
-    def __init__(self, url, hook):
-        self.url = url
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        page = requests.get(url)
-        tree = html.fromstring(page.content)
-        title_raw = tree.xpath("//h1[@class='prod-ProductTitle font-normal']")
-        title = title_raw[0].text
-        price_raw = tree.xpath("//span[@class='price display-inline-block arrange-fit price price--stylized']//span[@class='price-characteristic']")
-        price = price_raw[0].text
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        if page.status_code == 200:
-            if "Add to cart" in page.text:
-                print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
-                ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
-                slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart for $" + price + " - " + url}
-                if stockdict.get(url) == 'False':
-                    if maxprice != 0:
-                        if int(price) > maxprice:
-                            print("in stock but not MSRP")
-                        else:
-                            try:
-                                response = requests.post(
-                                webhook_url, data=json.dumps(slack_data),
-                                headers={'Content-Type': 'application/json'})
-                            except:
-                                print("Webhook sending failed. Invalid URL configured.")
-                    else:
-                        try:
-                            response = requests.post(
-                            webhook_url, data=json.dumps(slack_data),
-                            headers={'Content-Type': 'application/json'})
-                        except:
-                            print("Webhook sending failed. Invalid URL configured.")
-                stockdict.update({url: 'True'})
-            else: 
-                print("[" + current_time + "] " + "Sold Out: (Walmart.com) " + title)
-                #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Walmart.com) " + title + '\n')
-                stockdict.update({url: 'False'})
+	def __init__(self, url, hook):
+		self.url = url
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		page = requests.get(url)
+		tree = html.fromstring(page.content)
+		title_raw = tree.xpath("//h1[@class='prod-ProductTitle font-normal']")
+		title = title_raw[0].text
+		price_raw = tree.xpath("//span[@class='price display-inline-block arrange-fit price price--stylized']//span[@class='price-characteristic']")
+		price = price_raw[0].text
+		now = datetime.now()
+		current_time = now.strftime("%H:%M:%S")
+		if page.status_code == 200:
+			if "Add to cart" in page.text:
+				print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
+				ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
+				slack_data = {'content': "[" + current_time + "] " + title + " in stock at Walmart for $" + price + " - " + url}
+				if stockdict.get(url) == 'False':
+					if maxprice != 0:
+						if int(price) > maxprice:
+							print("in stock but not MSRP")
+						else:
+							try:
+								response = requests.post(
+								webhook_url, data=json.dumps(slack_data),
+								headers={'Content-Type': 'application/json'})
+							except:
+								print("Webhook sending failed. Invalid URL configured.")
+					else:
+						try:
+							response = requests.post(
+							webhook_url, data=json.dumps(slack_data),
+							headers={'Content-Type': 'application/json'})
+						except:
+							print("Webhook sending failed. Invalid URL configured.")
+				stockdict.update({url: 'True'})
+			else: 
+				print("[" + current_time + "] " + "Sold Out: (Walmart.com) " + title)
+				#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Walmart.com) " + title + '\n')
+				stockdict.update({url: 'False'})
 
 def write_log(string):
     try:

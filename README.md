@@ -26,9 +26,10 @@ To speed this up, just run `pip install -r requirements.txt`
 
 If you used birdbot you should already have these installed, aside from wxpython which you will still need to install.
 
-### BETA Gui for Windows.
+### BETA Gui
 
-- Not working on Mac
+- Working on Windows
+- UPDATED working on Mac (no more GUI freeze)
 - Not tested on Linux
 
 ![BETA GUI](./img/gui.png "Beta GUI")
