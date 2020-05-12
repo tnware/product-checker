@@ -580,6 +580,10 @@ class Target:
 		webhook_url = webhook_dict[hook]
 		page = requests.get(url)
 		al = page.text
+		tree = html.fromstring(page.content)
+		imgs = tree.xpath("//img[1]")
+		img_raw = str(imgs[0].attrib)
+		img = img_raw[20:-2]
 		title = al[al.find('"twitter":{"title":') + 20 : al.find('","card')]
         #print(title)
 		now = datetime.now()
@@ -591,7 +595,27 @@ class Target:
 		else: 
 			print("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url)
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
-			slack_data = {'content': "[" + current_time + "] " +  title + " in stock at Target - " + url}
+			slack_data = {
+				'content': "[" + current_time + "] " +  "Target Stock Alert:", 
+				'embeds': [{ 
+					'title': title,  
+					'description': title + " in stock at Target", 
+					'url': url, 
+					"fields": [
+					{
+						"name": "Time:",
+						"value": current_time
+					},
+					{
+						"name": "Status:",
+						"value": "In Stock"
+					}
+							],
+					'thumbnail': { 
+						'url': img
+						}
+					}]
+				}
 			if stockdict.get(url) == 'False':
 				response = requests.post(
 				webhook_url, data=json.dumps(slack_data),
@@ -630,7 +654,7 @@ class Walmart:
 							"name": "Price:",
 							"value": "$" + price
 						}
-					],
+								],
 						'thumbnail': { 
 							'url': img
 							}
