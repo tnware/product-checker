@@ -527,7 +527,8 @@ class BestBuy:
 				ex.log.AppendText("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link + '\n')
 				#slack_data = {'content': "[" + current_time + "] " +  product_name + " In Stock @ BestBuy " + link}
 				slack_data = {
-					'content': "[" + current_time + "] " +  "BestBuy Stock Alert:", 
+					'username': "BestBuy Bot",
+					'content': "BestBuy Stock Alert:", 
 					'embeds': [{ 
 						'title': product_name,  
 						'description': product_name + " in stock at BestBuy", 
@@ -583,7 +584,8 @@ class Gamestop:
 			print("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url)
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url + '\n')
 			slack_data = {
-				'content': "[" + current_time + "] " +  "GameStop Stock Alert:", 
+				'username': "GameStop Bot",
+				'content': "GameStop Stock Alert:", 
 				'embeds': [{ 
 					'title': title,  
 					'description': title + " in stock at GameStop", 
@@ -638,7 +640,8 @@ class Target:
 			print("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url)
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
 			slack_data = {
-				'content': "[" + current_time + "] " +  "Target Stock Alert:", 
+				'username': "Target Bot",
+				'content': "Target Stock Alert:", 
 				'embeds': [{ 
 					'title': title,  
 					'description': title + " in stock at Target", 
@@ -686,7 +689,8 @@ class Walmart:
 				print("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url)
 				ex.log.AppendText("[" + current_time + "] " + "In Stock: (Walmart.com) " + title + " for $" + price + " - " + url + '\n')
 				slack_data = {
-					'content': "[" + current_time + "] " +  "Walmart Stock Alert:", 
+					'username': "Walmart Bot",
+					'content': "Walmart Stock Alert:", 
 					'embeds': [{ 
 						'title': title,  
 						'description': title + " in stock at Walmart for $" + price, 
