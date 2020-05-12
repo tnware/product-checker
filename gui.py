@@ -535,42 +535,63 @@ class BestBuy:
 
 class Gamestop:
 
-    def __init__(self, url, hook):
-        self.url = url
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        options = webdriver.ChromeOptions()
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        options.add_argument('log-level=3')
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
-        options.add_argument("headless")
-        driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
-        driver.get(url)
+	def __init__(self, url, hook):
+		self.url = url
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		options = webdriver.ChromeOptions()
+		options.add_experimental_option('excludeSwitches', ['enable-logging'])
+		options.add_argument('log-level=3')
+		options.add_argument('--ignore-certificate-errors')
+		options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
+		options.add_argument("headless")
+		driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
+		driver.get(url)
 
-        html = driver.page_source
-
-        status_raw = driver.find_element_by_xpath("//div[@class='add-to-cart-buttons']")
-        status_text = status_raw.text
-        title_raw = driver.find_element_by_xpath("//h1[@class='product-name h2']")
-        title_text = title_raw.text
-        title = title_text
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        if "ADD TO CART" in status_text:
-            print("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url)
-            ex.log.AppendText("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url + '\n')
-            slack_data = {'content': "[" + current_time + "] " +  title + " in stock at Gamestop - " + url}
-            if stockdict.get(url) == 'False':
-                response = requests.post(
-                webhook_url, data=json.dumps(slack_data),
-                headers={'Content-Type': 'application/json'})
-            stockdict.update({url: 'True'})
-        else:
-            print("[" + current_time + "] " + "Sold Out: (Gamestop.com) " + title)
-            #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Gamestop.com) " + title + '\n')
-            stockdict.update({url: 'False'})
-        driver.quit()
+		html = driver.page_source
+		status_raw = driver.find_element_by_xpath("//div[@class='add-to-cart-buttons']")
+		status_text = status_raw.text
+		title_raw = driver.find_element_by_xpath("//h1[@class='product-name h2']")
+		title_text = title_raw.text
+		title = title_text
+		image_raw = driver.find_element_by_xpath("//img[@class='mainImg ae-img']")
+		img = image_raw.get_attribute('src')
+		now = datetime.now()
+		current_time = now.strftime("%H:%M:%S")
+		if "ADD TO CART" in status_text:
+			print("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url)
+			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url + '\n')
+			slack_data = {
+				'content': "[" + current_time + "] " +  "GameStop Stock Alert:", 
+				'embeds': [{ 
+					'title': title,  
+					'description': title + " in stock at GameStop", 
+					'url': url, 
+					"fields": [
+					{
+						"name": "Time:",
+						"value": current_time
+					},
+					{
+						"name": "Status:",
+						"value": "In Stock"
+					}
+							],
+					'thumbnail': { 
+						'url': img
+						}
+					}]
+				}
+			if stockdict.get(url) == 'False':
+				response = requests.post(
+				webhook_url, data=json.dumps(slack_data),
+				headers={'Content-Type': 'application/json'})
+			stockdict.update({url: 'True'})
+		else:
+			print("[" + current_time + "] " + "Sold Out: (Gamestop.com) " + title)
+			#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Gamestop.com) " + title + '\n')
+			stockdict.update({url: 'False'})
+		driver.quit()
 
 class Target:
 
@@ -650,6 +671,10 @@ class Walmart:
 						'description': title + " in stock at Walmart for $" + price, 
 						'url': url, 
 						"fields": [
+						{
+						"name": "Time:",
+						"value": current_time
+						},
 						{
 							"name": "Price:",
 							"value": "$" + price
