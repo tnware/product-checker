@@ -493,45 +493,66 @@ class BH:
 
 class BestBuy:
 
-    def __init__(self, sku, hook):
-        self.sku = sku
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C" + sku + "%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get"
-        headers2 = {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-        "cache-control": "max-age=0",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
-        }
-        page = requests.get(url, headers=headers2)
-        link = "https://www.bestbuy.com/site/" + sku + ".p?skuId=" + sku
-        al = page.text
-        search_string = '"skuId":"' + sku + '","buttonState":"'
-        stock_status = al[al.find(search_string) + 33 : al.find('","displayText"')]
-        product_name = sku_dict.get(sku)
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        if stock_status == "SOLD_OUT":
-            print("[" + current_time + "] " + "Sold Out: (BestBuy.com) " + product_name)
-            #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (BestBuy.com) " + product_name + '\n')
-            stockdict.update({sku: 'False'})
-        elif stock_status == "CHECK_STORES":
-            print(product_name + " sold out @ BestBuy (check stores status)")
-            stockdict.update({sku: 'False'})
-        else: 
-            if stock_status == "ADD_TO_CART":
-                print("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link)
-                ex.log.AppendText("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link + '\n')
-                slack_data = {'content': "[" + current_time + "] " +  product_name + " In Stock @ BestBuy " + link}
-                if stockdict.get(sku) == 'False':
-                    response = requests.post(
-                    webhook_url, data=json.dumps(slack_data),
-                    headers={'Content-Type': 'application/json'})
-                stockdict.update({sku: 'True'})
-                #print(stockdict)
+	def __init__(self, sku, orig_url, hook):
+		self.sku = sku
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C" + sku + "%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get"
+		headers2 = {
+		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+		"accept-encoding": "gzip, deflate, br",
+		"accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+		"cache-control": "max-age=0",
+		"upgrade-insecure-requests": "1",
+		"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
+		}
+		page = requests.get(url, headers=headers2)
+		link = "https://www.bestbuy.com/site/" + sku + ".p?skuId=" + sku
+		al = page.text
+		search_string = '"skuId":"' + sku + '","buttonState":"'
+		stock_status = al[al.find(search_string) + 33 : al.find('","displayText"')]
+		product_name = sku_dict.get(sku)
+		now = datetime.now()
+		current_time = now.strftime("%H:%M:%S")
+		if stock_status == "SOLD_OUT":
+			print("[" + current_time + "] " + "Sold Out: (BestBuy.com) " + product_name)
+			#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (BestBuy.com) " + product_name + '\n')
+			stockdict.update({sku: 'False'})
+		elif stock_status == "CHECK_STORES":
+			print(product_name + " sold out @ BestBuy (check stores status)")
+			stockdict.update({sku: 'False'})
+		else: 
+			if stock_status == "ADD_TO_CART":
+				print("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link)
+				ex.log.AppendText("[" + current_time + "] " + "In Stock: (BestBuy.com) " + product_name + " - " + link + '\n')
+				#slack_data = {'content': "[" + current_time + "] " +  product_name + " In Stock @ BestBuy " + link}
+				slack_data = {
+					'content': "[" + current_time + "] " +  "BestBuy Stock Alert:", 
+					'embeds': [{ 
+						'title': product_name,  
+						'description': product_name + " in stock at BestBuy", 
+						'url': url, 
+						"fields": [
+						{
+							"name": "Time:",
+							"value": current_time
+						},
+						{
+							"name": "Status:",
+							"value": "In Stock"
+						}
+								],
+						'thumbnail': { 
+							'url': bbimgdict.get(sku)
+							}
+						}]
+					}
+				if stockdict.get(orig_url) == 'False':
+					response = requests.post(
+					webhook_url, data=json.dumps(slack_data),
+					headers={'Content-Type': 'application/json'})
+				stockdict.update({orig_url: 'True'})
+				#print(stockdict)
 
 class Gamestop:
 
@@ -735,14 +756,14 @@ def amzfunc(url, hook, i):
                 break
         except:
             break
-def bestbuyfunc(sku, hook, i):
+def bestbuyfunc(sku, orig_url, hook, i):
     print("Thread started -> " + sku)
     while True:
         try:
             active_status = ex.list.GetItemText(i, col=2)
             if active_status == "Active":
                 try:
-                    BestBuy(sku, hook)
+                    BestBuy(sku, orig_url, hook)
                 except:
                     print("Some error ocurred parsing BestBuy")
                     write_log("An error ocurred parsing BestBuy")
@@ -819,100 +840,104 @@ def walmartfunc(url, hook, i):
 
 def RunJob(url, hook, i):
 
-    #Amazon URL Detection
-    if "amazon.com" in url:
-        active_status = ex.list.GetItemText(i, col=2)
-        if "offer-listing" in url:
-            if active_status != "Active":
-                colour = wx.Colour(0, 255, 0, 255)
-                ex.list.SetItemTextColour(i, colour)
-                ex.list.SetItem(i, 2, "Active")
-                print("Amazon URL detected using Webhook destination " + hook)
-                write_log(("Amazon URL detected -> " + hook))
-                t = Thread(target=amzfunc, args=(url, hook, i))
-                t.start()
-                time.sleep(0.5)
-        else:
-            print("Invalid Amazon link detected. Please use the Offer Listing page.")
+	#Amazon URL Detection
+	if "amazon.com" in url:
+		active_status = ex.list.GetItemText(i, col=2)
+		if "offer-listing" in url:
+			if active_status != "Active":
+				colour = wx.Colour(0, 255, 0, 255)
+				ex.list.SetItemTextColour(i, colour)
+				ex.list.SetItem(i, 2, "Active")
+				print("Amazon URL detected using Webhook destination " + hook)
+				write_log(("Amazon URL detected -> " + hook))
+				t = Thread(target=amzfunc, args=(url, hook, i))
+				t.start()
+				time.sleep(0.5)
+		else:
+			print("Invalid Amazon link detected. Please use the Offer Listing page.")
 
-   #Target URL Detection
-    elif "gamestop.com" in url:
-        active_status = ex.list.GetItemText(i, col=2)
-        if active_status != "Active":
-            colour = wx.Colour(0, 255, 0, 255)
-            ex.list.SetItemTextColour(i, colour)
-            ex.list.SetItem(i, 2, "Active")
-            print("Gamestop URL detected using Webhook destination " + hook)
-            write_log(("GameStop URL detected -> " + hook))
-            t = Thread(target=gamestopfunc, args=(url, hook, i))
-            t.start()
-            time.sleep(0.5)
+	#Target URL Detection
+	elif "gamestop.com" in url:
+		active_status = ex.list.GetItemText(i, col=2)
+		if active_status != "Active":
+			colour = wx.Colour(0, 255, 0, 255)
+			ex.list.SetItemTextColour(i, colour)
+			ex.list.SetItem(i, 2, "Active")
+			print("Gamestop URL detected using Webhook destination " + hook)
+			write_log(("GameStop URL detected -> " + hook))
+			t = Thread(target=gamestopfunc, args=(url, hook, i))
+			t.start()
+			time.sleep(0.5)
 
-    #BestBuy URL Detection
-    elif "bestbuy.com" in url:
-        print("BestBuy URL detected using Webhook destination " + hook)
-        #ex.log.AppendText("BestBuy URL detected using Webhook destination " + hook + '\n')          
-        parsed = urlparse.urlparse(url)
-        sku = parse_qs(parsed.query)['skuId']
-        sku = sku[0]
-        bestbuylist.append(sku)
-        headers = {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-        "cache-control": "max-age=0",
-        "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
-        }
-        page = requests.get(url, headers=headers)
-        al = page.text
-        title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
-        sku_dict.update({sku: title})
-        bbdict.update({sku: hook})
-        active_status = ex.list.GetItemText(i, col=2)
-        if active_status != "Active":
-            colour = wx.Colour(0, 255, 0, 255)
-            ex.list.SetItemTextColour(i, colour)
-            ex.list.SetItem(i, 2, "Active")
-            print("BestBuy URL detected using Webhook destination " + hook)
-            write_log(("BestBuy URL detected -> " + hook))
-            t = Thread(target=bestbuyfunc, args=(sku, hook, i))
-            t.start()
-            time.sleep(0.5)
+	#BestBuy URL Detection
+	elif "bestbuy.com" in url:
+		print("BestBuy URL detected using Webhook destination " + hook)
+		#ex.log.AppendText("BestBuy URL detected using Webhook destination " + hook + '\n')          
+		parsed = urlparse.urlparse(url)
+		sku = parse_qs(parsed.query)['skuId']
+		sku = sku[0]
+		bestbuylist.append(sku)
+		headers = {
+		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+		"accept-encoding": "gzip, deflate, br",
+		"accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+		"cache-control": "max-age=0",
+		"upgrade-insecure-requests": "1",
+		"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.69 Safari/537.36"
+		}
+		page = requests.get(url, headers=headers)
+		al = page.text
+		tree = html.fromstring(page.content)
+		img = tree.xpath('//img[@class="primary-image"]/@src')[0]
+		title = al[al.find('<title >') + 8 : al.find(' - Best Buy</title>')]
+		sku_dict.update({sku: title})
+		bbdict.update({sku: hook})
+		bbimgdict.update({sku: img})
+		active_status = ex.list.GetItemText(i, col=2)
+		if active_status != "Active":
+			colour = wx.Colour(0, 255, 0, 255)
+			ex.list.SetItemTextColour(i, colour)
+			ex.list.SetItem(i, 2, "Active")
+			print("BestBuy URL detected using Webhook destination " + hook)
+			write_log(("BestBuy URL detected -> " + hook))
+			orig_url = url
+			t = Thread(target=bestbuyfunc, args=(sku, orig_url, hook, i))
+			t.start()
+			time.sleep(0.5)
 
-    #Target URL Detection
-    elif "target.com" in url:
-        #targetlist.append(url)
-        active_status = ex.list.GetItemText(i, col=2)
-        if active_status != "Active":
-            colour = wx.Colour(0, 255, 0, 255)
-            ex.list.SetItemTextColour(i, colour)
-            ex.list.SetItem(i, 2, "Active")
-            print("Target URL detected using Webhook destination " + hook)
-            write_log(("Target URL detected -> " + hook))
-            t = Thread(target=targetfunc, args=(url, hook, i))
-            t.start()
-            time.sleep(0.5)
+	#Target URL Detection
+	elif "target.com" in url:
+		#targetlist.append(url)
+		active_status = ex.list.GetItemText(i, col=2)
+		if active_status != "Active":
+			colour = wx.Colour(0, 255, 0, 255)
+			ex.list.SetItemTextColour(i, colour)
+			ex.list.SetItem(i, 2, "Active")
+			print("Target URL detected using Webhook destination " + hook)
+			write_log(("Target URL detected -> " + hook))
+			t = Thread(target=targetfunc, args=(url, hook, i))
+			t.start()
+			time.sleep(0.5)
 
-    #Walmart URL Detection
-    elif "walmart.com" in url:
-        #walmartlist.append(url)
-        active_status = ex.list.GetItemText(i, col=2)
-        if active_status != "Active":
-            colour = wx.Colour(0, 255, 0, 255)
-            ex.list.SetItemTextColour(i, colour)
-            ex.list.SetItem(i, 2, "Active")
-            print("Walmart URL detected using Webhook destination " + hook)
-            write_log(("Walmart URL detected -> " + hook))
-            t = Thread(target=walmartfunc, args=(url, hook, i))
-            t.start()
-            time.sleep(0.5)
+	#Walmart URL Detection
+	elif "walmart.com" in url:
+		#walmartlist.append(url)
+		active_status = ex.list.GetItemText(i, col=2)
+		if active_status != "Active":
+			colour = wx.Colour(0, 255, 0, 255)
+			ex.list.SetItemTextColour(i, colour)
+			ex.list.SetItem(i, 2, "Active")
+			print("Walmart URL detected using Webhook destination " + hook)
+			write_log(("Walmart URL detected -> " + hook))
+			t = Thread(target=walmartfunc, args=(url, hook, i))
+			t.start()
+			time.sleep(0.5)
 
-    #B&H Photo URL Detection
-    elif "bhphotovideo.com" in url:
-        #bhlist.append(url)
-        print("B&H URL detected using Webhook destination " + hook)
-        #ex.log.AppendText("B&H URL detected using Webhook destination " + hook + '\n')
+	#B&H Photo URL Detection
+	elif "bhphotovideo.com" in url:
+		#bhlist.append(url)
+		print("B&H URL detected using Webhook destination " + hook)
+		#ex.log.AppendText("B&H URL detected using Webhook destination " + hook + '\n')
 
 def main():
 
@@ -931,6 +956,9 @@ def main():
 
 	global bbdict
 	bbdict = {}
+
+	global bbimgdict
+	bbimgdict = {}
 
 	global sku_dict
 	sku_dict = {}
