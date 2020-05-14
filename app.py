@@ -115,9 +115,6 @@ class Gamestop:
         options.add_argument("headless")
         driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
         driver.get(url)
-
-        html = driver.page_source
-
         status_raw = driver.find_element_by_xpath("//div[@class='add-to-cart-buttons']")
         status_text = status_raw.text
         title_raw = driver.find_element_by_xpath("//h1[@class='product-name h2']")
