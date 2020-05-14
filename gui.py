@@ -845,6 +845,28 @@ def walmartfunc(url, hook, i):
         except:
             break
 
+def bhfunc(url, hook, i):
+    print("Thread started -> " + url)
+    while True:
+        try:
+            active_status = ex.list.GetItemText(i, col=2)
+            if active_status == "Active":
+                try:
+                    hook = ex.list.GetItemText(i, col=1)
+                    BH(url, hook)
+                except:
+                    print("Some error ocurred parsing BH Photo")
+                    write_log("An error ocurred parsing BH Photo")
+                time.sleep(10)
+            else:
+                print("Aborted Thread")
+                colour = wx.Colour(0, 0, 0, 255)
+                ex.list.SetItemTextColour(i, colour)
+                ex.list.SetItem(i, 2, "Inactive")
+                break
+        except:
+            break
+
 def RunJob(url, hook, i):
 
 	#Amazon URL Detection
@@ -956,9 +978,19 @@ def RunJob(url, hook, i):
 
 	#B&H Photo URL Detection
 	elif "bhphotovideo.com" in url:
-		#bhlist.append(url)
-		print("B&H URL detected using Webhook destination " + hook)
-		#ex.log.AppendText("B&H URL detected using Webhook destination " + hook + '\n')
+		try:
+			active_status = ex.list.GetItemText(i, col=2)
+			if active_status != "Active":
+				colour = wx.Colour(0, 255, 0, 255)
+				ex.list.SetItemTextColour(i, colour)
+				ex.list.SetItem(i, 2, "Active")
+				print("BH Photo URL detected using Webhook destination " + hook)
+				write_log(("BH Photo URL detected -> " + hook))
+				t = Thread(target=bhfunc, args=(url, hook, i))
+				t.start()
+				time.sleep(0.5)
+		except:
+			print("Error processing URL: " + url)
 
 def main():
 
