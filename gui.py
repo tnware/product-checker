@@ -427,69 +427,119 @@ def set_data(path, val1, val2):
 
 class Amazon:
 
-    def __init__(self, url, hook):
-        self.url = url
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        options = webdriver.ChromeOptions()
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        options.add_argument('log-level=3')
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
-        options.add_argument("headless")
-        driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
-        driver.get(url)
+	def __init__(self, url, hook):
+		self.url = url
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		options = webdriver.ChromeOptions()
+		options.add_experimental_option('excludeSwitches', ['enable-logging'])
+		options.add_argument('log-level=3')
+		options.add_argument('--ignore-certificate-errors')
+		options.add_argument('--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"')
+		options.add_argument("headless")
+		driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
+		driver.get(url)
 
-        html = driver.page_source
-        if "To discuss automated access to Amazon data please contact api-services-support@amazon.com." in html:
-            print("Amazon's Bot Protection is preventing this call.")
-            ex.log.AppendText("Amazon's Bot Protection prevented a refresh." + '\n')
-        else: 
-            status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
-            status_text = status_raw.text
-            title_raw = driver.find_element_by_xpath("//h1[@class='a-size-large a-spacing-none']")
-            title_text = title_raw.text
-            title = title_text
-            now = datetime.now()
-            current_time = now.strftime("%H:%M:%S")
-            if "Currently, there are no sellers that can deliver this item to your location." not in status_text:
-                print("[" + current_time + "] " + "In Stock: (Amazon.com) " + title + " - " + url)
-                slack_data = {'content': "[" + current_time + "] " +  title + " in stock at Amazon - " + url}
-                ex.log.AppendText("[" + current_time + "] " +  title + " in stock at Amazon - " + url + '\n')
-                if stockdict.get(url) == 'False':
-                    response = requests.post(
-                    webhook_url, data=json.dumps(slack_data),
-                    headers={'Content-Type': 'application/json'})
-                stockdict.update({url: 'True'})
-            else:
-                print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
-                #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title + '\n')
-                stockdict.update({url: 'False'})
-        driver.quit()
+		html = driver.page_source
+		if "To discuss automated access to Amazon data please contact api-services-support@amazon.com." in html:
+			print("Amazon's Bot Protection is preventing this call.")
+			ex.log.AppendText("Amazon's Bot Protection prevented a refresh." + '\n')
+		else: 
+			status_raw = driver.find_element_by_xpath("//div[@id='olpOfferList']")
+			status_text = status_raw.text
+			title_raw = driver.find_element_by_xpath("//h1[@class='a-size-large a-spacing-none']")
+			title_text = title_raw.text
+			title = title_text
+			img_raw = driver.find_element_by_xpath("//div[@id='olpProductImage']//img")
+			img = img_raw.get_attribute('src')
+			now = datetime.now()
+			current_time = now.strftime("%H:%M:%S")
+			if "Currently, there are no sellers that can deliver this item to your location." not in status_text:
+				print("[" + current_time + "] " + "In Stock: (Amazon.com) " + title + " - " + url)
+				slack_data = {
+					'username': "Amazon Bot",
+					'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/amazon.png",
+					'content': "Amazon Stock Alert:", 
+					'embeds': [{ 
+						'title': title,  
+						'description': title + " in stock on Amazon", 
+						'url': url, 
+						"fields": [
+						{
+							"name": "Time:",
+							"value": current_time
+						},
+						{
+							"name": "Status:",
+							"value": "In Stock"
+						}
+								],
+						'thumbnail': { 
+							'url': img
+							}
+						}]
+					}
+				ex.log.AppendText("[" + current_time + "] " +  title + " in stock at Amazon - " + url + '\n')
+				if stockdict.get(url) == 'False':
+					response = requests.post(
+					webhook_url, data=json.dumps(slack_data),
+					headers={'Content-Type': 'application/json'})
+				stockdict.update({url: 'True'})
+			else:
+				print("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title)
+				#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Amazon.com) " + title + '\n')
+				stockdict.update({url: 'False'})
+		driver.quit()
 
 class BH:
 
-    def __init__(self, url, hook):
-        self.url = url
-        self.hook = hook
-        webhook_url = webhook_dict[hook]
-        page = requests.get(url)
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        if page.status_code == 200:
-            if "Add to Cart" in page.text:
-                print("[" + current_time + "] " + "In Stock: (bhphotovideo.com) " + url)
-                slack_data = {'content': "[" + current_time + "] " + url + " in stock at B&H"}
-                ex.log.AppendText("[" + current_time + "] " + "In Stock: (bhphotovideo.com) " + url + '\n')
-                if stockdict.get(url) == 'False':
-                    response = requests.post(
-                                             webhook_url, data=json.dumps(slack_data),
-                                             headers={'Content-Type': 'application/json'})
-                stockdict.update({url: 'True'})
-            else:
-                print("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url)
-                #ex.log.AppendText("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url + '\n')
-                stockdict.update({url: 'False'})
+	def __init__(self, url, hook):
+		self.url = url
+		self.hook = hook
+		webhook_url = webhook_dict[hook]
+		page = requests.get(url)
+		#tree = html.fromstring(page.content)
+		#imgs = tree.xpath("//a[contains(@class,'wrapper')]")
+		#img_raw = {imgs[0].attrib}
+		#img = img_raw.__getattribute__(href)
+		now = datetime.now()
+		current_time = now.strftime("%H:%M:%S")
+		if page.status_code == 200:
+			if "Add to Cart" in page.text:
+				print("[" + current_time + "] " + "In Stock: (bhphotovideo.com) " + url)
+				slack_data = {
+					'username': "BH Photo Bot",
+					'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/bhphoto.png",
+					'content': "BH Photo Stock Alert: " + url, 
+					'embeds': [{ 
+						'title': url,  
+						'description': url + " in stock at BH Photo", 
+						'url': url, 
+						"fields": [
+						{
+							"name": "Time:",
+							"value": current_time
+						},
+						{
+							"name": "Status:",
+							"value": "In Stock"
+						}
+								],
+						'thumbnail': { 
+							'url': "https://wiki.tripwireinteractive.com/images/4/47/Placeholder.png"
+							}
+						}]
+					}
+				ex.log.AppendText("[" + current_time + "] " + "In Stock: (bhphotovideo.com) " + url + '\n')
+				if stockdict.get(url) == 'False':
+					response = requests.post(
+												webhook_url, data=json.dumps(slack_data),
+												headers={'Content-Type': 'application/json'})
+				stockdict.update({url: 'True'})
+			else:
+				print("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url)
+				#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (bhphotovideo.com) " + url + '\n')
+				stockdict.update({url: 'False'})
 
 class BestBuy:
 
@@ -586,6 +636,7 @@ class Gamestop:
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Gamestop.com) " + title + " - " + url + '\n')
 			slack_data = {
 				'username': "GameStop Bot",
+				'avatar_url': "https://github.com/tnware/product-checker/raw/master/img/gamestop.png",
 				'content': "GameStop Stock Alert:", 
 				'embeds': [{ 
 					'title': title,  
