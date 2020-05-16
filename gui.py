@@ -684,11 +684,12 @@ class Target:
         #print(title)
 		now = datetime.now()
 		current_time = now.strftime("%H:%M:%S")
-		if "Temporarily out of stock" in page.text:
+		status = al[al.find('"availability_status":"') + 23 : al.find('","multichannel_options"')]
+		if status == "OUT_OF_STOCK":
 			print("[" + current_time + "] " + "Sold Out: (Target.com) " + title)
 			#ex.log.AppendText("[" + current_time + "] " + "Sold Out: (Target.com) " + title + '\n')
 			stockdict.update({url: 'False'})
-		else: 
+		elif status == "IN_STOCK":
 			print("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url)
 			ex.log.AppendText("[" + current_time + "] " + "In Stock: (Target.com) " + title + " - " + url + '\n')
 			slack_data = {
@@ -720,6 +721,8 @@ class Target:
 				headers={'Content-Type': 'application/json'})
 			stockdict.update({url: 'True'})
 		#print(stockdict)
+		else:
+			print("[" + current_time + "] " + "UNKNOWN STATUS: (Target.com) " + title + " for status of: " + status)
 
 class Walmart:
 
